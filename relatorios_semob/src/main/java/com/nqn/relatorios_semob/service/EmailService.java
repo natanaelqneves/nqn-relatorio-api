@@ -49,7 +49,7 @@ public class EmailService {
             List<Relatorio> relatorios = relatorioRepository.findAllById(idsRelatorios);
             Map<String, byte[]> arquivosDocx = new HashMap<>();
 
-            // 1. Gera o DOCX de cada relatório selecionado e joga no mapa
+            //Gera o DOCX de cada relatório
             for (Relatorio r : relatorios) {
                 byte[] docxBytes = docxService.gerarDocx(r);
 
@@ -59,30 +59,28 @@ public class EmailService {
                 arquivosDocx.put(nomeArquivo, docxBytes);
             }
 
-            // 2. Compacta tudo em um único ZIP
+            //Compacta tudo em um único ZIP
             byte[] zipBytes = zipService.compactarArquivos(arquivosDocx);
 
-            // =========================================================================
-            // 🚨 3. NOVO: CONFIGURAÇÃO DO PROVEDOR DE E-MAIL DINÂMICO DO AGENTE LOGADO
-            // =========================================================================
+
             JavaMailSenderImpl dinamicMailSender = new JavaMailSenderImpl();
             dinamicMailSender.setHost("smtp.gmail.com");
             dinamicMailSender.setPort(587);
 
-            // Puxa as credenciais específicas que o usuário salvou no cadastro dele
+            //Puxa as credenciais específicas que o usuário salvou no cadastro dele
             dinamicMailSender.setUsername(usuarioLogado.getEmailSmtp());   // ex: agente.nael@gmail.com
             String senhaSmtpOriginal = criptografiaUtil.descriptografar(usuarioLogado.getSenhaAppSmtp());
-            dinamicMailSender.setPassword(senhaSmtpOriginal); // A "Senha de App" de 16 dígitos
+            dinamicMailSender.setPassword(senhaSmtpOriginal);
 
             Properties props = dinamicMailSender.getJavaMailProperties();
             props.put("mail.transport.protocol", "smtp");
             props.put("mail.smtp.auth", "true");
             props.put("mail.smtp.starttls.enable", "true");
-            props.put("mail.debug", "false"); // Mude para true se quiser ver os logs do SMTP no terminal do Render
+            props.put("mail.debug", "false");
             // =========================================================================
 
 
-            // 4. Prepara o e-mail utilizando o emissor dinâmico
+            //Prepara o e-mail utilizando o emissor dinâmico
             MimeMessage message = dinamicMailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
@@ -94,11 +92,10 @@ public class EmailService {
             helper.setSubject("Relatórios de Serviço do mês " + mes + ".");
             helper.setText("<p>Olá,</p><p>Seguem em anexo os relatórios de serviço do mês de " + mes + ".</p>", true);
 
-            // Anexa o ZIP direto da memória
+
             String nomeZip = "Relatorios_" + relatorios.get(0).getUsuario().getNomeCompleto().replace(" ", "_") + "_" + mes.toUpperCase() + ".zip";
             helper.addAttachment(nomeZip, new ByteArrayResource(zipBytes));
 
-            // Envia usando o configurador dinâmico
             dinamicMailSender.send(message);
             System.out.println("E-mail enviado com sucesso via SMTP do usuário: " + usuarioLogado.getEmailSmtp());
 

@@ -47,16 +47,17 @@ public class DocxService {
             tags.put("{{horaFim}}", relatorio.getHoraFinal().toString());
             tags.put("{{dataDoServico}}", relatorio.getDataDoServico().format(formatter));
 
-            String diaDaSemanaCapitalizado = relatorio.getDataDoServico().getDayOfWeek().getDisplayName(TextStyle.FULL, new Locale("pt", "BR"));
-            tags.put("{{diaDaSemana}}", diaDaSemanaCapitalizado.substring(0, 1).toUpperCase() + diaDaSemanaCapitalizado.substring(1));
+            String diaDaSemana = relatorio.getDataDoServico().getDayOfWeek().getDisplayName(TextStyle.FULL, new Locale("pt", "BR"));
+            tags.put("{{diaDaSemana}}", diaDaSemana.substring(0, 1).toUpperCase() + diaDaSemana.substring(1));
+
             tags.put("{{kmInicial}}", String.valueOf(relatorio.getKmInicial()));
             tags.put("{{kmFinal}}", String.valueOf(relatorio.getKmFinal()));
             tags.put("{{avarias}}", relatorio.getAvarias() != null ? relatorio.getAvarias() : "Nenhuma");
             tags.put("{{sinistro}}", relatorio.getSinistro() != null ? relatorio.getSinistro() : "Nenhum");
 
-            // =======================================================================
-            // 🛡️ REGULAGEM DAS OCORRÊNCIAS: Evita o estouro caso a lista venha vazia
-            // =======================================================================
+
+
+            //Evita o estouro caso a lista venha vazia
             boolean temOcorrencia = relatorio.getOcorrencias() != null && !relatorio.getOcorrencias().isEmpty();
             String urlFotoSupabase = null;
 
@@ -96,7 +97,7 @@ public class DocxService {
         } catch (Exception e) {
             // Log detalhado no console do Render para você rastrear se algo mais falhar
             e.printStackTrace();
-            throw new RuntimeException("Erro catastrófico ao preencher e gerar o documento do relatório. Causa: " + e.getMessage(), e);
+            throw new RuntimeException("Erro ao preencher e gerar o documento do relatório. Causa: " + e.getMessage(), e);
         }
     }
 
@@ -106,7 +107,6 @@ public class DocxService {
 
             if (textoParagrafo != null && textoParagrafo.contains("{{")) {
 
-                // 🚨 1. CASO ESPECÍFICO: É a tag da imagem da câmera?
                 if (textoParagrafo.contains("{{fotoOcorrencia}}")) {
                     String urlDaImagem = tags.get("{{fotoOcorrencia}}");
 
@@ -123,7 +123,7 @@ public class DocxService {
 
                             if (imagemBytes != null && imagemBytes.length > 0) {
 
-                                // 1. Detecta o tipo do arquivo (PNG ou JPEG)
+                                //Detecta o tipo do arquivo
                                 int tipoImagemPOI = Document.PICTURE_TYPE_JPEG;
                                 String extensao = "jpg";
 
@@ -134,9 +134,7 @@ public class DocxService {
                                     extensao = "png";
                                 }
 
-                                // =======================================================================
-                                // 🚨 NOVA LÓGICA: LÊ AS DIMENSÕES REAIS DO FRONT-END (ANTI-DISTORÇÃO)
-                                // =======================================================================
+                                // Ajusta os tamanhos para o front end
                                 int larguraRealPixels;
                                 int alturaRealPixels;
 
@@ -153,11 +151,10 @@ public class DocxService {
                                     }
                                 }
 
-                                // Opcional: Se a imagem do front ainda for muito grande para a folha A4 (ex: mais que 450px de largura),
-                                // podemos aplicar uma escala simples para ela caber na margem do Word sem esticar:
+                                // Aplica escala simples para ela caber na margem do doc.
                                 double escala = 1.0;
-                                if (larguraRealPixels > 450) {
-                                    escala = 450.0 / larguraRealPixels; // Reduz o tamanho mantendo a proporção matemática
+                                if (larguraRealPixels > 400) {
+                                    escala = 400.0 / larguraRealPixels; // Reduz o tamanho mantendo a proporção matemática
                                 }
 
                                 int larguraFinalEmPontos = (int) (larguraRealPixels * escala);
@@ -167,7 +164,7 @@ public class DocxService {
                                 try (InputStream imageStream = new java.io.ByteArrayInputStream(imagemBytes)) {
                                     novoRun.addCarriageReturn();
 
-                                    // 🚨 AGORA USA AS MEDIDAS PROPORCIONAIS CALCULADAS DINAMICAMENTE
+                                    //MEDIDAS PROPORCIONAIS CALCULADAS DINAMICAMENTE
                                     novoRun.addPicture(
                                             imageStream,
                                             tipoImagemPOI,
@@ -179,10 +176,10 @@ public class DocxService {
                                     novoRun.addCarriageReturn();
                                 }
                             } else {
-                                novoRun.setText("[O arquivo de imagem retornou vazio do servidor]");
+                                novoRun.setText("O arquivo de imagem retornou vazio do servidor");
                             }
                         } catch (Exception e) {
-                            System.err.println("💥 Erro ao processar proporção da imagem: " + e.getMessage());
+                            System.err.println("Erro ao processar proporção da imagem: " + e.getMessage());
                             novoRun.setText("[Erro ao processar imagem remota: " + e.getMessage() + "]");
                         }
                     } else {
@@ -191,7 +188,7 @@ public class DocxService {
                     continue; // Avança para o próximo parágrafo
                 }
 
-                // 🚨 2. FLUXO NORMAL: Substituição de textos (Incluso descrição da ocorrência)
+
                 boolean mudou = false;
                 for (Map.Entry<String, String> tag : tags.entrySet()) {
                     // Não deixa o loop de texto misturar com a lógica da foto

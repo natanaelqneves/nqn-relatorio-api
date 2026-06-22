@@ -16,7 +16,6 @@ public class OcorrenciaViaService {
     private final OcorrenciaViaRepository ocorrenciaViaRepository;
     private final RelatorioRepository relatorioRepository;
 
-    // Injeção via Construtor (Boa prática do Spring, dispensa o @Autowired)
     public OcorrenciaViaService(OcorrenciaViaRepository ocorrenciaViaRepository, RelatorioRepository relatorioRepository) {
         this.ocorrenciaViaRepository = ocorrenciaViaRepository;
         this.relatorioRepository = relatorioRepository;
@@ -24,11 +23,9 @@ public class OcorrenciaViaService {
 
     @Transactional
     public void salvarOcorrencia(Long relatorioId, OcorrenciaViaRequestDTO dto) {
-        // 1. Garante que o relatório do plantão existe
         Relatorio relatorio = relatorioRepository.findById(relatorioId)
                 .orElseThrow(() -> new EntityNotFoundException("Relatório não encontrado com o ID: " + relatorioId));
 
-        // 2. Instancia a entidade (Java puro, sem Lombok)
         OcorrenciaVia novaOcorrencia = new OcorrenciaVia();
         novaOcorrencia.setRelatorio(relatorio);
         novaOcorrencia.setUrlFoto(dto.urlFoto());
@@ -36,10 +33,8 @@ public class OcorrenciaViaService {
         novaOcorrencia.setLatitude(dto.latitude());
         novaOcorrencia.setLongitude(dto.longitude());
 
-        // 3. Grava no banco
         ocorrenciaViaRepository.save(novaOcorrencia);
     }
-
 
     public void deletarPorIdRelatorio(Long id) {
         ocorrenciaViaRepository.deleteByRelatorioId(id);

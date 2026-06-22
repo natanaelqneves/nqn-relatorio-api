@@ -33,17 +33,14 @@ public class RelatorioService {
         Viatura viatura = viaturaService.buscarViaturaPorPlaca(dto.placaViatura());
         viatura.setKmAtual(dto.kmFinal());
 
-
+        Integer horaFim = (dto.horaInicio() + dto.horasPlantao()) % 24;
 
         Relatorio relatorio = new Relatorio();
+
         relatorio.setUsuario(usuarioLogado);
         relatorio.setDataDoServico(dto.dataDoServico());
         relatorio.setHorasPlantao(dto.horasPlantao());
         relatorio.setHoraIncio(dto.horaInicio());
-        System.out.println(dto.horasPlantao());
-        System.out.println(dto.horaInicio());
-        Integer horaFim = (dto.horaInicio() + dto.horasPlantao()) % 24;
-        System.out.println(horaFim);
         relatorio.setHoraFinal(horaFim);
         relatorio.setViatura(viatura);
         relatorio.setKmInicial(dto.kmInicial());
@@ -62,16 +59,14 @@ public class RelatorioService {
         Viatura viatura = viaturaService.buscarViaturaPorPlaca(dto.placaViatura());
         viatura.setKmAtual(dto.kmFinal());
 
+        Integer horaFim = (dto.horaInicio() + dto.horasPlantao()) % 24;
+
         Relatorio relatorio = relatorioRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Relatório não encontrado com o ID: " + id));
 
         relatorio.setDataDoServico(dto.dataDoServico());
         relatorio.setHorasPlantao(dto.horasPlantao());
         relatorio.setHoraIncio(dto.horaInicio());
-        System.out.println(dto.horasPlantao());
-        System.out.println(dto.horaInicio());
-        Integer horaFim = (dto.horaInicio() + dto.horasPlantao()) % 24;
-        System.out.println(horaFim);
         relatorio.setHoraFinal(horaFim);
         relatorio.setViatura(viatura);
         relatorio.setKmInicial(dto.kmInicial());
@@ -124,7 +119,6 @@ public class RelatorioService {
 
             relatorios = relatorioRepository.findByUsuarioIdAndPeriodo(usuarioLogado.getId(), dataInicio, dataFim);
         } else {
-            // Busca padrão (Trás todos os meses do usuário)
             relatorios = relatorioRepository.findByUsuarioIdOrderByDataDoServicoDesc(usuarioLogado.getId());
         }
 
@@ -138,7 +132,6 @@ public class RelatorioService {
         Relatorio relatorio = relatorioRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Relatório não encontrado com o ID: " + id));
 
-//        ocorrenciaViaService.deletarPorIdRelatorio(relatorio.getId());
         relatorioRepository.deleteById(id);
     }
 
@@ -148,7 +141,6 @@ public class RelatorioService {
 
         return relatorio;
     }
-
 
     private RelatorioResponseDTO novoRelatorioResponse(Relatorio relatorio) {
         return new RelatorioResponseDTO(

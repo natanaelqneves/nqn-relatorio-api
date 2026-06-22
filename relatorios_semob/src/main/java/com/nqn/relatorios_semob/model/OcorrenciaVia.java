@@ -15,7 +15,7 @@ public class OcorrenciaVia {
 
     @ManyToOne
     @JoinColumn(name = "relatorio_id", nullable = false)
-    @JsonIgnore // 🚨 Essencial! Evita que a ocorrência tente renderizar o relatório todo de novo
+    @JsonIgnore
     private Relatorio relatorio;
 
     @Column(name = "url_foto", nullable = false, length = 500)
@@ -33,12 +33,10 @@ public class OcorrenciaVia {
     @Column(name = "data_registro")
     private LocalDateTime dataRegistro;
 
-    // Construtor Padrão (Obrigatório para o Hibernate)
     public OcorrenciaVia() {
         this.dataRegistro = LocalDateTime.now();
     }
 
-    // Construtor Completo
     public OcorrenciaVia(Long id, Relatorio relatorio, String urlFoto, String descricaoDefeito, Double latitude, Double longitude, LocalDateTime dataRegistro) {
         this.id = id;
         this.relatorio = relatorio;
@@ -49,7 +47,6 @@ public class OcorrenciaVia {
         this.dataRegistro = dataRegistro != null ? dataRegistro : LocalDateTime.now();
     }
 
-    // Getters e Setters Tradicionais
     public Long getId() {
         return id;
     }

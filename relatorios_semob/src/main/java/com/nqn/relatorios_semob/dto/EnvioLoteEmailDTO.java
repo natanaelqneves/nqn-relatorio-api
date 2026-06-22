@@ -9,7 +9,6 @@ public class EnvioLoteEmailDTO {
     @NotEmpty(message = "É necessário selecionar pelo menos um relatório para envio.")
     private List<Long> idsRelatorios;
 
-    // Construtores
     public EnvioLoteEmailDTO() {}
 
     public EnvioLoteEmailDTO(List<Long> idsRelatorios) {

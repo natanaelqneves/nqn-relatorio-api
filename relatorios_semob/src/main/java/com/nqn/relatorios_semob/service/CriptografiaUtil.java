@@ -7,16 +7,14 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 import java.util.Base64;
 
-@Component // 🚨 1. Transforma a classe em um Componente gerenciado pelo Spring
+@Component
 public class CriptografiaUtil {
 
     private static final String ALGORITMO = "AES";
 
-    // 🚨 2. Injeta o texto puro da chave que está no application.properties ou no Render
     @Value("${KEY.SECRET}")
     private String chaveSecretaString;
 
-    // 🚨 3. REMOVIDO o "static": Agora é um método de instância comum
     public String criptografar(String textoPuro) {
         try {
             // Cria a chave spec dinamicamente usando os bytes da string injetada
@@ -31,7 +29,6 @@ public class CriptografiaUtil {
         }
     }
 
-    // 🚨 4. REMOVIDO o "static"
     public String descriptografar(String textoCriptografado) {
         try {
             SecretKeySpec key = new SecretKeySpec(chaveSecretaString.getBytes(), ALGORITMO);
