@@ -1,0 +1,87 @@
+package com.nqn.relatorios_semob.service;
+
+
+import com.nqn.relatorios_semob.dto.UsuarioRequestDTO;
+import com.nqn.relatorios_semob.dto.UsuarioResponseDTO;
+import com.nqn.relatorios_semob.model.Usuario;
+import com.nqn.relatorios_semob.repository.UsuarioRepository;
+import jakarta.transaction.Transactional;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
+
+@Service
+public class UsuarioService {
+
+    private final UsuarioRepository usuarioRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final CriptografiaUtil criptografiaUtil;
+
+    public UsuarioService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder, CriptografiaUtil criptografiaUtil) {
+        this.usuarioRepository = usuarioRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.criptografiaUtil = criptografiaUtil;
+    }
+
+    @Transactional
+    public UsuarioResponseDTO cadastrar(UsuarioRequestDTO dto){
+
+        if(buscarPorNomeDeUsuario(dto.nomeDeUsuario()).isPresent()) {
+            throw  new IllegalArgumentException("Nome de Usuário indisponível.");
+        }
+
+        if(buscarPorMatricula(dto.matricula()).isPresent()) {
+            throw  new IllegalArgumentException("Matrícula já cadastrada.");
+        }
+
+        if(buscarPorEmail(dto.email()).isPresent()) {
+            throw  new IllegalArgumentException("Email já cadastrado.");
+        }
+
+        if(buscarPorEmail(dto.emailSmtp()).isPresent()) {
+            throw  new IllegalArgumentException("Email para envio de relatórios já cadastrado.");
+        }
+
+        String senhaCriptografada = passwordEncoder.encode(dto.senha());
+
+        String senhaSmtpCriptografada = criptografiaUtil.criptografar(dto.senhaSmtp());
+
+        Usuario usuario = new Usuario();
+        usuario.setNomeCompleto(dto.nomeCompleto());
+        usuario.setMatricula(dto.matricula());
+        usuario.setNomeDeUsuario(dto.nomeDeUsuario());
+        usuario.setSenha(senhaCriptografada);
+        usuario.setEmail(dto.email());
+        usuario.setEmailSmtp(dto.emailSmtp());
+        usuario.setSenhaAppSmtp(senhaSmtpCriptografada);
+
+        Usuario usuarioSalvo = usuarioRepository.save(usuario);
+
+        UsuarioResponseDTO  response= new UsuarioResponseDTO(
+                usuarioSalvo.getNomeCompleto(),
+                usuarioSalvo.getMatricula(),
+                usuarioSalvo.getNomeDeUsuario(),
+                usuarioSalvo.getEmail(),
+                usuario.getAssinatura());
+        return response;
+    }
+
+    private Optional<Object> buscarPorMatricula(String matricula) {
+        return usuarioRepository.findByMatricula(matricula);
+    }
+
+    private Optional<Object> buscarPorEmail(String email) {
+        return usuarioRepository.findByEmail(email);
+    }
+
+    public List<Usuario> listarUsuarios(){
+        return usuarioRepository.findAll();
+    }
+
+    public Optional<Usuario> buscarPorNomeDeUsuario(String nomeDeUsuario) {
+        return usuarioRepository.findByNomeDeUsuario(nomeDeUsuario);
+    }
+}
+
