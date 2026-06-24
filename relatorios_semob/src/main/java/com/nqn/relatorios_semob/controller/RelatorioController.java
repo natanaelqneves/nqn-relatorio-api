@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("relatorios")
+@RequestMapping("/relatorios")
 public class RelatorioController {
 
     private final RelatorioService relatorioService;
@@ -93,10 +93,8 @@ public class RelatorioController {
         Relatorio relatorio = relatorioService.buscarPorIdEUsuario(id, usuarioLogado);
         byte[] pdfBytes = docxService.gerarDocx(relatorio);
 
-        // Configura os cabeçalhos HTTP para o navegador entender que é um arquivo PDF para download
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.wordprocessingml.document"));
-        // 2. Altera a extensão do anexo para .docx
         headers.setContentDispositionFormData("attachment", "Relatorio_Servico_" + id + ".docx");
 
         return ResponseEntity.ok()

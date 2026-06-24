@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("relatorios/email")
+@RequestMapping("/relatorios/email")
 public class RelatorioEmailController {
 
     private final EmailService emailService;

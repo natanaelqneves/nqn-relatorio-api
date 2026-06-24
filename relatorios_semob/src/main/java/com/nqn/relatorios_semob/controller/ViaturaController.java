@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("viatura")
+@RequestMapping("/viatura")
 public class ViaturaController {
 
     private ViaturaService viaturaService;
