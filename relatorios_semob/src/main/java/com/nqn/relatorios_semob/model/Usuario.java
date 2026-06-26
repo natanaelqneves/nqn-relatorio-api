@@ -4,6 +4,7 @@ package com.nqn.relatorios_semob.model;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
@@ -131,7 +132,8 @@ public class Usuario implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of();
+        // 🛠️ Garante que o Spring Security reconheça o usuário como autenticado e ativo
+        return List.of(new SimpleGrantedAuthority("ROLE_USER"));
     }
 
     @Override

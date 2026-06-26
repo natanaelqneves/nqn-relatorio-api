@@ -4,6 +4,7 @@ package com.nqn.relatorios_semob.controller;
 import com.nqn.relatorios_semob.dto.OcorrenciaViaRequestDTO;
 import com.nqn.relatorios_semob.dto.RelatorioRequestDTO;
 import com.nqn.relatorios_semob.dto.RelatorioResponseDTO;
+import com.nqn.relatorios_semob.model.OcorrenciaVia;
 import com.nqn.relatorios_semob.model.Relatorio;
 import com.nqn.relatorios_semob.model.Usuario;
 import com.nqn.relatorios_semob.service.DocxService;
@@ -51,20 +52,6 @@ public class RelatorioController {
         RelatorioResponseDTO relatorioResponseDTO = relatorioService.atualizar(id, dto);
         return ResponseEntity.status(HttpStatus.OK).body(relatorioResponseDTO);
     }
-
-
-    @PostMapping("/{id}/ocorrencias-via")
-    public ResponseEntity<Void> adicionarOcorrencia(
-            @PathVariable Long id,
-            @Valid @RequestBody OcorrenciaViaRequestDTO dto) {
-
-        // Agora delega a responsabilidade para o service correto!
-        ocorrenciaViaService.salvarOcorrencia(id, dto);
-
-        return ResponseEntity.status(HttpStatus.CREATED).build();
-    }
-
-
 
     @GetMapping("/{id}")
     public ResponseEntity<RelatorioResponseDTO> buscarPorId(

@@ -4,15 +4,12 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public record OcorrenciaViaRequestDTO(
-        @NotBlank(message = "Url da imagem não apresentada.")
+        @NotBlank
         String urlFoto,
-
-        @NotBlank(message = "Descrição do fato não apresentado.")
+        @NotBlank
         String descricaoDefeito,
-
-        @NotBlank(message = "Erro ao capturar localização de latitude.")
+        @NotNull
         Double latitude,
-
-        @NotBlank(message = "Erro ao capturar localização de longitude.")
+        @NotNull
         Double longitude
 ) {}

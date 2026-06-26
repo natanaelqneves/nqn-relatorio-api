@@ -32,8 +32,11 @@ public class JwtService {
     }
 
     public String extrairLogin(String token) {
-        return extrairClaim(token, Claims::getSubject);
-    }
+        try {
+            return extrairClaim(token, Claims::getSubject);
+        } catch (Exception e) {
+            return null;
+        }    }
 
     public boolean isTokenValido(String token, Usuario usuario){
         final String loginToken = extrairLogin(token);

@@ -8,6 +8,7 @@ import com.nqn.relatorios_semob.model.Relatorio;
 import com.nqn.relatorios_semob.model.Usuario;
 import com.nqn.relatorios_semob.model.Viatura;
 import com.nqn.relatorios_semob.repository.RelatorioRepository;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -56,13 +57,19 @@ public class RelatorioService {
 
     @Transactional
     public RelatorioResponseDTO atualizar(Long id, RelatorioRequestDTO dto){
+        // 1. Valide a existência do relatório primeiro (Evita processamento desnecessário)
+        if (!relatorioRepository.existsById(id)) {
+            throw new EntityNotFoundException("Relatório não encontrado com o ID: " + id);
+        }
+
+        // 2. Busca a viatura e atualiza o KM
         Viatura viatura = viaturaService.buscarViaturaPorPlaca(dto.placaViatura());
         viatura.setKmAtual(dto.kmFinal());
 
-        Integer horaFim = (dto.horaInicio() + dto.horasPlantao()) % 24;
+        // 3. Obtém o Proxy do relatório (o SELECT será disparado na primeira alteração abaixo)
+        Relatorio relatorio = relatorioRepository.getReferenceById(id);
 
-        Relatorio relatorio = relatorioRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Relatório não encontrado com o ID: " + id));
+        Integer horaFim = (dto.horaInicio() + dto.horasPlantao()) % 24;
 
         relatorio.setDataDoServico(dto.dataDoServico());
         relatorio.setHorasPlantao(dto.horasPlantao());
