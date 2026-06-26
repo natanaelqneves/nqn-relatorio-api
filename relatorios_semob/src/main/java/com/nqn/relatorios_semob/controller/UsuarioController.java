@@ -29,10 +29,10 @@ public class UsuarioController {
         return ResponseEntity.status(HttpStatus.CREATED).body(novoUsuario);
     }
 
-    @GetMapping
-    public ResponseEntity<List<Usuario>> listarUsuarios(){
-        List<Usuario> usuarios = usuarioService.listarUsuarios();
-        return ResponseEntity.ok(usuarios);
-    }
+//    @GetMapping
+//    public ResponseEntity<List<Usuario>> listarUsuarios(){
+//        List<Usuario> usuarios = usuarioService.listarUsuarios();
+//        return ResponseEntity.ok(usuarios);
+//    }
 }
 
