@@ -57,16 +57,13 @@ public class RelatorioService {
 
     @Transactional
     public RelatorioResponseDTO atualizar(Long id, RelatorioRequestDTO dto){
-        // 1. Valide a existência do relatório primeiro (Evita processamento desnecessário)
         if (!relatorioRepository.existsById(id)) {
             throw new EntityNotFoundException("Relatório não encontrado com o ID: " + id);
         }
 
-        // 2. Busca a viatura e atualiza o KM
         Viatura viatura = viaturaService.buscarViaturaPorPlaca(dto.placaViatura());
         viatura.setKmAtual(dto.kmFinal());
 
-        // 3. Obtém o Proxy do relatório (o SELECT será disparado na primeira alteração abaixo)
         Relatorio relatorio = relatorioRepository.getReferenceById(id);
 
         Integer horaFim = (dto.horaInicio() + dto.horasPlantao()) % 24;

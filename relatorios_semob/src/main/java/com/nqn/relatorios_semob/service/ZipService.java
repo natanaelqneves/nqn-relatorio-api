@@ -17,11 +17,9 @@ public class ZipService {
              ZipOutputStream zos = new ZipOutputStream(baos)) {
 
             for (Map.Entry<String, byte[]> arquivo : arquivos.entrySet()) {
-                // Cria uma entrada (arquivo) dentro do ZIP
                 ZipEntry entry = new ZipEntry(arquivo.getKey());
                 zos.putNextEntry(entry);
 
-                // Escreve os bytes do documento docx dentro da entrada
                 zos.write(arquivo.getValue() != null ? arquivo.getValue() : new byte[0]);
                 zos.closeEntry();
             }

@@ -4,12 +4,12 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public record OcorrenciaViaRequestDTO(
-        @NotBlank
+        @NotBlank(message = "A URL da imagem é obrigatória.")
         String urlFoto,
-        @NotBlank
+        @NotBlank(message = "A descrição da ocorrência é obrigatória.")
         String descricaoDefeito,
-        @NotNull
+        @NotNull(message = "Erro ao enviar dados de latitude.")
         Double latitude,
-        @NotNull
+        @NotNull(message = "Erro ao enviar dados de longitude.")
         Double longitude
 ) {}

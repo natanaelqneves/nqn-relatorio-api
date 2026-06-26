@@ -53,13 +53,11 @@ public class EmailService {
             for (Relatorio r : relatorios) {
                 byte[] docxBytes = docxService.gerarDocx(r);
 
-                // Nome fantasia do arquivo dentro do ZIP (Ex: Relatorio_Platnao_10.docx)
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
                 String nomeArquivo = "Relatorio_" + r.getUsuario().getNomeCompleto() + "_" + r.getDataDoServico().format(formatter) +"_"+ turno(r) + ".docx";
                 arquivosDocx.put(nomeArquivo, docxBytes);
             }
 
-            //Compacta tudo em um único ZIP
             byte[] zipBytes = zipService.compactarArquivos(arquivosDocx);
 
 
@@ -67,7 +65,6 @@ public class EmailService {
             dinamicMailSender.setHost("smtp.gmail.com");
             dinamicMailSender.setPort(587);
 
-            //Puxa as credenciais específicas que o usuário salvou no cadastro dele
             dinamicMailSender.setUsername(usuarioLogado.getEmailSmtp());   // ex: agente.nael@gmail.com
             String senhaSmtpOriginal = criptografiaUtil.descriptografar(usuarioLogado.getSenhaAppSmtp());
             dinamicMailSender.setPassword(senhaSmtpOriginal);
@@ -77,10 +74,7 @@ public class EmailService {
             props.put("mail.smtp.auth", "true");
             props.put("mail.smtp.starttls.enable", "true");
             props.put("mail.debug", "false");
-            // =========================================================================
 
-
-            //Prepara o e-mail utilizando o emissor dinâmico
             MimeMessage message = dinamicMailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 

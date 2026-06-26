@@ -17,7 +17,6 @@ public class CriptografiaUtil {
 
     public String criptografar(String textoPuro) {
         try {
-            // Cria a chave spec dinamicamente usando os bytes da string injetada
             SecretKeySpec key = new SecretKeySpec(chaveSecretaString.getBytes(), ALGORITMO);
 
             Cipher cipher = Cipher.getInstance(ALGORITMO);

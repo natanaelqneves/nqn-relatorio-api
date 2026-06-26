@@ -89,15 +89,12 @@ public class RelatorioController {
                 .body(pdfBytes);
     }
 
-
-
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletarPorId(
             @PathVariable Long id,
             @AuthenticationPrincipal Usuario usuarioLogado){
         Relatorio relatorio = relatorioService.buscarPorIdEUsuario(id, usuarioLogado);
 
-        // Validação de segurança que garante que o relatório é do próprio usuário logado
         if (relatorio.getUsuario() == null || !relatorio.getUsuario().getId().equals(usuarioLogado.getId())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
