@@ -6,6 +6,7 @@ import com.nqn.relatorios_semob.dto.UsuarioRequestDTO;
 import com.nqn.relatorios_semob.dto.UsuarioResponseDTO;
 import com.nqn.relatorios_semob.model.Usuario;
 import com.nqn.relatorios_semob.repository.UsuarioRepository;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -77,7 +78,10 @@ public class UsuarioService {
             Usuario usuarioLogado,
             AssinaturaDTO dto) {
 
-    usuarioLogado.setAssinatura(dto.assinatura());
+        Usuario usuario = usuarioRepository.findById(usuarioLogado.getId())
+                .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado"));
+
+    usuario.setAssinatura(dto.assinatura());
     }
 
     private Optional<Object> buscarPorMatricula(String matricula) {
