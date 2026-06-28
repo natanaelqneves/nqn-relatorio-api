@@ -70,7 +70,6 @@ public class DocxService {
 
             String urlFotoAssinatura = relatorio.getUsuario().getAssinatura();
 
-            System.out.println("Foto Ocorrência: " + urlFotoSupabase);
             tags.put("{{fotoOcorrencia}}", urlFotoSupabase != null ? urlFotoSupabase : "");
             tags.put("{{assinatura}}", urlFotoAssinatura != null ? urlFotoAssinatura : "");
             // =======================================================================
