@@ -104,87 +104,36 @@ public class DocxService {
 
             if (textoParagrafo != null && textoParagrafo.contains("{{")) {
 
+                // ==========================================
+                // LÓGICA 1: FOTO DA OCORRÊNCIA
+                // ==========================================
                 if (textoParagrafo.contains("{{fotoOcorrencia}}")) {
                     String urlDaImagem = tags.get("{{fotoOcorrencia}}");
-
-                    limparRunsDoParagrafo(paragrafo);
-                    XWPFRun novoRun = paragrafo.createRun();
-
-                    if (urlDaImagem != null && !urlDaImagem.isBlank()) {
-                        try {
-                            String urlFormatada = urlDaImagem.trim().replace(" ", "%20");
-
-                            HttpRequest request = HttpRequest.newBuilder().uri(URI.create(urlFormatada)).build();
-                            byte[] imagemBytes = httpClient.send(request, HttpResponse.BodyHandlers.ofByteArray()).body();
-
-                            if (imagemBytes != null && imagemBytes.length > 0) {
-
-                                //Detecta o tipo do arquivo
-                                int tipoImagemPOI = Document.PICTURE_TYPE_JPEG;
-                                String extensao = "jpg";
-
-                                if (imagemBytes.length > 4 &&
-                                        imagemBytes[0] == (byte)0x89 && imagemBytes[1] == (byte)0x50 &&
-                                        imagemBytes[2] == (byte)0x4E && imagemBytes[3] == (byte)0x47) {
-                                    tipoImagemPOI = Document.PICTURE_TYPE_PNG;
-                                    extensao = "png";
-                                }
-
-                                int larguraRealPixels;
-                                int alturaRealPixels;
-
-                                try (InputStream dimStream = new java.io.ByteArrayInputStream(imagemBytes)) {
-                                    java.awt.image.BufferedImage imagemAgente = javax.imageio.ImageIO.read(dimStream);
-                                    if (imagemAgente != null) {
-                                        larguraRealPixels = imagemAgente.getWidth();
-                                        alturaRealPixels = imagemAgente.getHeight();
-
-                                    } else {
-                                        larguraRealPixels = 300;
-                                        alturaRealPixels = 400;
-                                    }
-                                }
-
-                                double escala = 1.0;
-                                if (larguraRealPixels > 400) {
-                                    escala = 400.0 / larguraRealPixels; // Reduz o tamanho mantendo a proporção matemática
-                                }
-
-                                int larguraFinalEmPontos = (int) (larguraRealPixels * escala);
-                                int alturaFinalEmPontos = (int) (alturaRealPixels * escala);
-
-                                try (InputStream imageStream = new java.io.ByteArrayInputStream(imagemBytes)) {
-                                    novoRun.addCarriageReturn();
-
-                                    novoRun.addPicture(
-                                            imageStream,
-                                            tipoImagemPOI,
-                                            "foto_ocorrencia." + extensao,
-                                            Units.toEMU(larguraFinalEmPontos),
-                                            Units.toEMU(alturaFinalEmPontos)
-                                    );
-
-                                    novoRun.addCarriageReturn();
-                                }
-                            } else {
-                                novoRun.setText("O arquivo de imagem retornou vazio do servidor");
-                            }
-                        } catch (Exception e) {
-                            System.err.println("Erro ao processar proporção da imagem: " + e.getMessage());
-                            novoRun.setText("[Erro ao processar imagem remota: " + e.getMessage() + "]");
-                        }
-                    } else {
-                        novoRun.setText("Nenhuma foto anexada a esta ocorrência.");
-                    }
-                    continue; // Avança para o próximo parágrafo
+                    processarEInserirImagemRemota(paragrafo, urlDaImagem, "foto_ocorrencia", 400.0);
+                    continue;
                 }
 
+                // ==========================================
+                // LÓGICA 2: ASSINATURA DO AGENTE
+                // ==========================================
+                if (textoParagrafo.contains("{{assinatura}}")) {
+                    String urlDaAssinatura = tags.get("{{assinatura}}");
+                    // Definimos uma largura máxima menor para a assinatura (ex: 200.0) para ficar esteticamente elegante no documento
+                    processarEInserirImagemRemota(paragrafo, urlDaAssinatura, "assinatura_agente", 200.0);
+                    continue;
+                }
 
+                // ==========================================
+                // LÓGICA 3: SUBSTITUIÇÃO DE TEXTOS GERAIS
+                // ==========================================
                 boolean mudou = false;
                 for (Map.Entry<String, String> tag : tags.entrySet()) {
-                    // Não deixa o loop de texto misturar com a lógica da foto
-                    if (!tag.getKey().equals("{{fotoOcorrencia}}") && textoParagrafo.contains(tag.getKey())) {
-                        textoParagrafo = textoParagrafo.replace(tag.getKey(), tag.getValue());
+                    // Impede que as tags de mídia entrem no fluxo de substituição de texto comum
+                    if (!tag.getKey().equals("{{fotoOcorrencia}}") &&
+                            !tag.getKey().equals("{{assinatura}}") &&
+                            textoParagrafo.contains(tag.getKey())) {
+
+                        textoParagrafo = textoParagrafo.replace(tag.getKey(), tag.getValue() != null ? tag.getValue() : "");
                         mudou = true;
                     }
                 }
@@ -197,6 +146,184 @@ public class DocxService {
             }
         }
     }
+    private void processarEInserirImagemRemota(XWPFParagraph paragrafo, String urlDaImagem, String nomeArquivoBase, double larguraMaximaDesejada) {
+        limparRunsDoParagrafo(paragrafo);
+        XWPFRun novoRun = paragrafo.createRun();
+
+        if (urlDaImagem != null && !urlDaImagem.isBlank()) {
+            try {
+                // Garante que espaços acidentais na URL sejam codificados corretamente
+                String urlFormatada = urlDaImagem.trim().replace(" ", "%20");
+
+                // Efetua o download dos bytes da imagem usando o HttpClient nativo
+                java.net.http.HttpRequest request = java.net.http.HttpRequest.newBuilder()
+                        .uri(java.net.URI.create(urlFormatada))
+                        .build();
+
+                byte[] imagemBytes = httpClient.send(request, java.net.http.HttpResponse.BodyHandlers.ofByteArray()).body();
+
+                if (imagemBytes != null && imagemBytes.length > 0) {
+
+                    // 1. Detecta se o arquivo é PNG ou JPEG através dos "Magic Numbers" (assinatura binária)
+                    int tipoImagemPOI = org.apache.poi.xwpf.usermodel.Document.PICTURE_TYPE_JPEG;
+                    String extensao = "jpg";
+
+                    if (imagemBytes.length > 4 &&
+                            imagemBytes[0] == (byte) 0x89 && imagemBytes[1] == (byte) 0x50 &&
+                            imagemBytes[2] == (byte) 0x4E && imagemBytes[3] == (byte) 0x47) {
+                        tipoImagemPOI = org.apache.poi.xwpf.usermodel.Document.PICTURE_TYPE_PNG;
+                        extensao = "png";
+                    }
+
+                    int larguraRealPixels;
+                    int alturaRealPixels;
+
+                    // 2. Lê a imagem na memória para capturar a largura e altura originais
+                    try (java.io.InputStream dimStream = new java.io.ByteArrayInputStream(imagemBytes)) {
+                        java.awt.image.BufferedImage imagemAgente = javax.imageio.ImageIO.read(dimStream);
+                        if (imagemAgente != null) {
+                            larguraRealPixels = imagemAgente.getWidth();
+                            alturaRealPixels = imagemAgente.getHeight();
+                        } else {
+                            // Valores de segurança caso o ImageIO falhe ao ler o buffer
+                            larguraRealPixels = 300;
+                            alturaRealPixels = 150;
+                        }
+                    }
+
+                    // 3. Calcula a escala proporcional matemática baseada no limite dinâmico fornecido
+                    double escala = 1.0;
+                    if (larguraRealPixels > larguraMaximaDesejada) {
+                        escala = larguraMaximaDesejada / larguraRealPixels;
+                    }
+
+                    int larguraFinalEmPontos = (int) (larguraRealPixels * escala);
+                    int alturaFinalEmPontos = (int) (alturaRealPixels * escala);
+
+                    // 4. Injeta a imagem com segurança dentro do fluxo de leitura do Apache POI
+                    try (java.io.InputStream imageStream = new java.io.ByteArrayInputStream(imagemBytes)) {
+                        novoRun.addCarriageReturn(); // Quebra de linha antes
+
+                        novoRun.addPicture(
+                                imageStream,
+                                tipoImagemPOI,
+                                nomeArquivoBase + "." + extensao,
+                                org.apache.poi.util.Units.toEMU(larguraFinalEmPontos),
+                                org.apache.poi.util.Units.toEMU(alturaFinalEmPontos)
+                        );
+
+                        novoRun.addCarriageReturn(); // Quebra de linha depois
+                    }
+                } else {
+                    novoRun.setText("O arquivo de imagem retornou vazio do servidor remetente");
+                }
+            } catch (Exception e) {
+                System.err.println("Erro ao processar proporção da imagem: " + e.getMessage());
+                novoRun.setText("[Erro ao carregar mídia remota: " + e.getMessage() + "]");
+            }
+        } else {
+            novoRun.setText("Nenhuma imagem anexada.");
+        }
+    }
+//    private void substituirTagsEImagens(List<XWPFParagraph> paragrafos, Map<String, String> tags) {
+//        for (XWPFParagraph paragrafo : paragrafos) {
+//            String textoParagrafo = paragrafo.getParagraphText();
+//
+//            if (textoParagrafo != null && textoParagrafo.contains("{{")) {
+//
+//                if (textoParagrafo.contains("{{fotoOcorrencia}}")) {
+//                    String urlDaImagem = tags.get("{{fotoOcorrencia}}");
+//
+//                    limparRunsDoParagrafo(paragrafo);
+//                    XWPFRun novoRun = paragrafo.createRun();
+//
+//                    if (urlDaImagem != null && !urlDaImagem.isBlank()) {
+//                        try {
+//                            String urlFormatada = urlDaImagem.trim().replace(" ", "%20");
+//
+//                            HttpRequest request = HttpRequest.newBuilder().uri(URI.create(urlFormatada)).build();
+//                            byte[] imagemBytes = httpClient.send(request, HttpResponse.BodyHandlers.ofByteArray()).body();
+//
+//                            if (imagemBytes != null && imagemBytes.length > 0) {
+//
+//                                //Detecta o tipo do arquivo
+//                                int tipoImagemPOI = Document.PICTURE_TYPE_JPEG;
+//                                String extensao = "jpg";
+//
+//                                if (imagemBytes.length > 4 &&
+//                                        imagemBytes[0] == (byte)0x89 && imagemBytes[1] == (byte)0x50 &&
+//                                        imagemBytes[2] == (byte)0x4E && imagemBytes[3] == (byte)0x47) {
+//                                    tipoImagemPOI = Document.PICTURE_TYPE_PNG;
+//                                    extensao = "png";
+//                                }
+//
+//                                int larguraRealPixels;
+//                                int alturaRealPixels;
+//
+//                                try (InputStream dimStream = new java.io.ByteArrayInputStream(imagemBytes)) {
+//                                    java.awt.image.BufferedImage imagemAgente = javax.imageio.ImageIO.read(dimStream);
+//                                    if (imagemAgente != null) {
+//                                        larguraRealPixels = imagemAgente.getWidth();
+//                                        alturaRealPixels = imagemAgente.getHeight();
+//
+//                                    } else {
+//                                        larguraRealPixels = 300;
+//                                        alturaRealPixels = 400;
+//                                    }
+//                                }
+//
+//                                double escala = 1.0;
+//                                if (larguraRealPixels > 400) {
+//                                    escala = 400.0 / larguraRealPixels; // Reduz o tamanho mantendo a proporção matemática
+//                                }
+//
+//                                int larguraFinalEmPontos = (int) (larguraRealPixels * escala);
+//                                int alturaFinalEmPontos = (int) (alturaRealPixels * escala);
+//
+//                                try (InputStream imageStream = new java.io.ByteArrayInputStream(imagemBytes)) {
+//                                    novoRun.addCarriageReturn();
+//
+//                                    novoRun.addPicture(
+//                                            imageStream,
+//                                            tipoImagemPOI,
+//                                            "foto_ocorrencia." + extensao,
+//                                            Units.toEMU(larguraFinalEmPontos),
+//                                            Units.toEMU(alturaFinalEmPontos)
+//                                    );
+//
+//                                    novoRun.addCarriageReturn();
+//                                }
+//                            } else {
+//                                novoRun.setText("O arquivo de imagem retornou vazio do servidor");
+//                            }
+//                        } catch (Exception e) {
+//                            System.err.println("Erro ao processar proporção da imagem: " + e.getMessage());
+//                            novoRun.setText("[Erro ao processar imagem remota: " + e.getMessage() + "]");
+//                        }
+//                    } else {
+//                        novoRun.setText("Nenhuma foto anexada a esta ocorrência.");
+//                    }
+//                    continue; // Avança para o próximo parágrafo
+//                }
+//
+//
+//                boolean mudou = false;
+//                for (Map.Entry<String, String> tag : tags.entrySet()) {
+//                    // Não deixa o loop de texto misturar com a lógica da foto
+//                    if (!tag.getKey().equals("{{fotoOcorrencia}}") && textoParagrafo.contains(tag.getKey())) {
+//                        textoParagrafo = textoParagrafo.replace(tag.getKey(), tag.getValue());
+//                        mudou = true;
+//                    }
+//                }
+//
+//                if (mudou) {
+//                    limparRunsDoParagrafo(paragrafo);
+//                    XWPFRun novoRun = paragrafo.createRun();
+//                    novoRun.setText(textoParagrafo);
+//                }
+//            }
+//        }
+//    }
 
     private void limparRunsDoParagrafo(XWPFParagraph paragrafo) {
         int totalRuns = paragrafo.getRuns().size();
