@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Base64;
 
 @RestController
-@RequestMapping("/cadastro")
+@RequestMapping
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
@@ -24,7 +24,8 @@ public class UsuarioController {
         this.usuarioService = usuarioService;
     }
 
-    @PostMapping
+
+    @PostMapping("/cadastro")
     public ResponseEntity<UsuarioResponseDTO> cadastrar(@RequestBody @Valid UsuarioRequestDTO dto){
         UsuarioResponseDTO novoUsuario = usuarioService.cadastrar(dto);
 
