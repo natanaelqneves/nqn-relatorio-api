@@ -10,10 +10,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
+
 import org.apache.poi.xwpf.usermodel.*;
 import org.apache.poi.util.Units;
 import org.apache.poi.xwpf.usermodel.*;
@@ -110,7 +108,6 @@ public class DocxService {
                 if (textoParagrafo.contains("{{fotoOcorrencia}}")) {
                     String urlDaImagem = tags.get("{{fotoOcorrencia}}");
 
-                    // Limpa o texto da tag antiga removendo os pedaços (runs) do Word
                     limparRunsDoParagrafo(paragrafo);
                     XWPFRun novoRun = paragrafo.createRun();
 
@@ -134,7 +131,6 @@ public class DocxService {
                                     extensao = "png";
                                 }
 
-                                // Ajusta os tamanhos para o front end
                                 int larguraRealPixels;
                                 int alturaRealPixels;
 
@@ -145,13 +141,11 @@ public class DocxService {
                                         alturaRealPixels = imagemAgente.getHeight();
 
                                     } else {
-                                        // Fallback de segurança caso o ImageIO falhe em ler o cabeçalho
                                         larguraRealPixels = 300;
                                         alturaRealPixels = 400;
                                     }
                                 }
 
-                                // Aplica escala simples para ela caber na margem do doc.
                                 double escala = 1.0;
                                 if (larguraRealPixels > 400) {
                                     escala = 400.0 / larguraRealPixels; // Reduz o tamanho mantendo a proporção matemática
@@ -159,18 +153,16 @@ public class DocxService {
 
                                 int larguraFinalEmPontos = (int) (larguraRealPixels * escala);
                                 int alturaFinalEmPontos = (int) (alturaRealPixels * escala);
-                                // =======================================================================
 
                                 try (InputStream imageStream = new java.io.ByteArrayInputStream(imagemBytes)) {
                                     novoRun.addCarriageReturn();
 
-                                    //MEDIDAS PROPORCIONAIS CALCULADAS DINAMICAMENTE
                                     novoRun.addPicture(
                                             imageStream,
                                             tipoImagemPOI,
                                             "foto_ocorrencia." + extensao,
-                                            Units.toEMU(larguraFinalEmPontos), // Largura real ou escalada
-                                            Units.toEMU(alturaFinalEmPontos)  // Altura proporcional perfeita
+                                            Units.toEMU(larguraFinalEmPontos),
+                                            Units.toEMU(alturaFinalEmPontos)
                                     );
 
                                     novoRun.addCarriageReturn();

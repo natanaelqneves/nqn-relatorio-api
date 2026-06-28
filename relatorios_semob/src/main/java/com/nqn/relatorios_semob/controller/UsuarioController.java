@@ -1,6 +1,7 @@
 package com.nqn.relatorios_semob.controller;
 
 
+import com.nqn.relatorios_semob.dto.AssinaturaDTO;
 import com.nqn.relatorios_semob.dto.UsuarioRequestDTO;
 import com.nqn.relatorios_semob.dto.UsuarioResponseDTO;
 import com.nqn.relatorios_semob.model.Usuario;
@@ -8,9 +9,10 @@ import com.nqn.relatorios_semob.service.UsuarioService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.util.Base64;
 
 @RestController
 @RequestMapping("/cadastro")
@@ -27,6 +29,16 @@ public class UsuarioController {
         UsuarioResponseDTO novoUsuario = usuarioService.cadastrar(dto);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(novoUsuario);
+    }
+
+    @PostMapping("/assinatura")
+    ResponseEntity<Void> salvarAssinatura(
+            @AuthenticationPrincipal Usuario usuarioLogado,
+            @RequestBody AssinaturaDTO dto) {
+
+        usuarioService.salvarAssinatura(usuarioLogado, dto);
+
+        return ResponseEntity.noContent().build();
     }
 
 //    @GetMapping

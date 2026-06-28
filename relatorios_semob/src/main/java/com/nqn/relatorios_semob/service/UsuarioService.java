@@ -1,14 +1,18 @@
 package com.nqn.relatorios_semob.service;
 
 
+import com.nqn.relatorios_semob.dto.AssinaturaDTO;
 import com.nqn.relatorios_semob.dto.UsuarioRequestDTO;
 import com.nqn.relatorios_semob.dto.UsuarioResponseDTO;
 import com.nqn.relatorios_semob.model.Usuario;
 import com.nqn.relatorios_semob.repository.UsuarioRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 
@@ -66,6 +70,14 @@ public class UsuarioService {
                 usuarioSalvo.getEmail(),
                 usuario.getAssinatura());
         return response;
+    }
+
+    @Transactional
+    public void salvarAssinatura(
+            Usuario usuarioLogado,
+            AssinaturaDTO dto) {
+
+    usuarioLogado.setAssinatura(dto.assinatura());
     }
 
     private Optional<Object> buscarPorMatricula(String matricula) {
