@@ -34,7 +34,7 @@ public class UsuarioController {
         return ResponseEntity.status(HttpStatus.CREATED).body(novoUsuario);
     }
 
-    @PostMapping("/assinatura")
+    @PutMapping("/assinatura")
     ResponseEntity<Void> salvarAssinatura(
             @AuthenticationPrincipal Usuario usuarioLogado,
             @RequestBody AssinaturaDTO dto) {

@@ -41,7 +41,7 @@ public class Usuario implements UserDetails {
     @Column(name = "senha_smtp")
     private String senhaAppSmtp;    // A "Senha de App" criptografada ou mascarada
 
-    @Column(name = "assinatura")
+    @Column(name = "assinatura", length = 500)
     private String assinatura;
 
     public Usuario() {
