@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/relatorios/email")
+@RequestMapping("/email")
 public class RelatorioEmailController {
 
     private final EmailService emailService;
@@ -22,7 +22,7 @@ public class RelatorioEmailController {
         this.emailService = emailService;
     }
 
-    @PostMapping("/enviar-lote")
+    @PostMapping
     public ResponseEntity<String> enviarLoteZip(
             @Valid @RequestBody EnvioLoteEmailDTO dto,
             @AuthenticationPrincipal Usuario usuarioLogado) {

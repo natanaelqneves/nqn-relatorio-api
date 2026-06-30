@@ -30,15 +30,6 @@ public class UsuarioController {
         return ResponseEntity.status(HttpStatus.CREATED).body(novoUsuario);
     }
 
-    @PutMapping("senha/{id}")
-    public ResponseEntity<UsuarioResponseDTO> mudarSenha(
-            @PathVariable Long id,
-            @RequestBody MudarSenhaDTO dto){
-
-        UsuarioResponseDTO responseDTO = usuarioService.mudarSenha(id, dto);
-        return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
-    }
-
     @PutMapping("/assinatura")
     ResponseEntity<Void> salvarAssinatura(
             @AuthenticationPrincipal Usuario usuarioLogado,
@@ -49,10 +40,16 @@ public class UsuarioController {
         return ResponseEntity.noContent().build();
     }
 
-//    @GetMapping
-//    public ResponseEntity<List<Usuario>> listarUsuarios(){
-//        List<Usuario> usuarios = usuarioService.listarUsuarios();
-//        return ResponseEntity.ok(usuarios);
-//    }
+    @PutMapping("senha/{id}")
+    public ResponseEntity<String> mudarSenha(
+            @PathVariable Long id,
+            @RequestBody MudarSenhaDTO dto){
+        try{
+            usuarioService.mudarSenha(id, dto);
+        } catch (RuntimeException e) {
+            throw new RuntimeException(e);
+        }
+        return ResponseEntity.ok("Senha alterada.");
+    }
 }
 

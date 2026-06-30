@@ -47,17 +47,17 @@ public class UsuarioService {
             throw  new IllegalArgumentException("Email para envio de relatórios já cadastrado.");
         }
 
-        String senhaCriptografada = passwordEncoder.encode(dto.senha());
+        String senhaCriptografada = passwordEncoder.encode(dto.senha().trim());
 
         String senhaSmtpCriptografada = criptografiaUtil.criptografar(dto.senhaSmtp());
 
         Usuario usuario = new Usuario();
-        usuario.setNomeCompleto(dto.nomeCompleto());
-        usuario.setMatricula(dto.matricula());
-        usuario.setNomeDeUsuario(dto.nomeDeUsuario());
+        usuario.setNomeCompleto(dto.nomeCompleto().trim());
+        usuario.setMatricula(dto.matricula().trim());
+        usuario.setNomeDeUsuario(dto.nomeDeUsuario().trim());
         usuario.setSenha(senhaCriptografada);
-        usuario.setEmail(dto.email());
-        usuario.setEmailSmtp(dto.emailSmtp());
+        usuario.setEmail(dto.email().trim());
+        usuario.setEmailSmtp(dto.emailSmtp().trim());
         usuario.setSenhaAppSmtp(senhaSmtpCriptografada);
 
         Usuario usuarioSalvo = usuarioRepository.save(usuario);
@@ -82,11 +82,11 @@ public class UsuarioService {
     usuario.setAssinatura(dto.assinatura());
     }
 
-    private Optional<Object> buscarPorMatricula(String matricula) {
+    private Optional<Usuario> buscarPorMatricula(String matricula) {
         return usuarioRepository.findByMatricula(matricula);
     }
 
-    private Optional<Object> buscarPorEmail(String email) {
+    public Optional<Usuario> buscarPorEmail(String email) {
         return usuarioRepository.findByEmail(email);
     }
 
@@ -104,7 +104,7 @@ public class UsuarioService {
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado"));
 
-        String senhaCriptografada = passwordEncoder.encode(dto.senha());
+        String senhaCriptografada = passwordEncoder.encode(dto.senha().trim());
 
         usuario.setSenha(senhaCriptografada);
 
@@ -118,4 +118,3 @@ public class UsuarioService {
         return response;
     }
 }
-
