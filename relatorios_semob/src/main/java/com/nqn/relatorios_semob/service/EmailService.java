@@ -27,7 +27,7 @@ import java.util.Map;
 public class EmailService {
 
     @Value("${email.destinatario}")
-    private final String emailDestinatario;
+    private String emailDestinatario;
     private final JavaMailSender mailSender;
     private final RelatorioRepository relatorioRepository;
     private final DocxService docxService;
@@ -35,12 +35,11 @@ public class EmailService {
     private final CriptografiaUtil criptografiaUtil;
     private final UsuarioService usuarioService;
 
-    public EmailService(String emailDestinatario, JavaMailSender mailSender,
+    public EmailService(JavaMailSender mailSender,
                         RelatorioRepository relatorioRepository, DocxService docxService,
                         ZipService zipService, CriptografiaUtil criptografiaUtil,
                         UsuarioService usuarioService) {
 
-        this.emailDestinatario = emailDestinatario;
         this.mailSender = mailSender;
         this.relatorioRepository = relatorioRepository;
         this.docxService = docxService;
