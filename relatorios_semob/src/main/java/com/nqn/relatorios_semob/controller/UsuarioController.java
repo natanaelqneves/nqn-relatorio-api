@@ -1,9 +1,7 @@
 package com.nqn.relatorios_semob.controller;
 
 
-import com.nqn.relatorios_semob.dto.AssinaturaDTO;
-import com.nqn.relatorios_semob.dto.UsuarioRequestDTO;
-import com.nqn.relatorios_semob.dto.UsuarioResponseDTO;
+import com.nqn.relatorios_semob.dto.*;
 import com.nqn.relatorios_semob.model.Usuario;
 import com.nqn.relatorios_semob.service.UsuarioService;
 import jakarta.validation.Valid;
@@ -11,8 +9,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Base64;
 
 @RestController
 @RequestMapping
@@ -32,6 +28,15 @@ public class UsuarioController {
         UsuarioResponseDTO novoUsuario = usuarioService.cadastrar(dto);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(novoUsuario);
+    }
+
+    @PutMapping("senha/{id}")
+    public ResponseEntity<UsuarioResponseDTO> mudarSenha(
+            @PathVariable Long id,
+            @RequestBody MudarSenhaDTO dto){
+
+        UsuarioResponseDTO responseDTO = usuarioService.mudarSenha(id, dto);
+        return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
     }
 
     @PutMapping("/assinatura")

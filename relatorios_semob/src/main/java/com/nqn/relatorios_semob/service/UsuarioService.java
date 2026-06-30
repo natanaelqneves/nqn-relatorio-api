@@ -2,18 +2,16 @@ package com.nqn.relatorios_semob.service;
 
 
 import com.nqn.relatorios_semob.dto.AssinaturaDTO;
+import com.nqn.relatorios_semob.dto.MudarSenhaDTO;
 import com.nqn.relatorios_semob.dto.UsuarioRequestDTO;
 import com.nqn.relatorios_semob.dto.UsuarioResponseDTO;
 import com.nqn.relatorios_semob.model.Usuario;
 import com.nqn.relatorios_semob.repository.UsuarioRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 
@@ -98,6 +96,26 @@ public class UsuarioService {
 
     public Optional<Usuario> buscarPorNomeDeUsuario(String nomeDeUsuario) {
         return usuarioRepository.findByNomeDeUsuario(nomeDeUsuario);
+    }
+
+    @Transactional
+    public UsuarioResponseDTO mudarSenha(Long id, MudarSenhaDTO dto) {
+
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado"));
+
+        String senhaCriptografada = passwordEncoder.encode(dto.senha());
+
+        usuario.setSenha(senhaCriptografada);
+
+        UsuarioResponseDTO  response = new UsuarioResponseDTO(
+                usuario.getNomeCompleto(),
+                usuario.getMatricula(),
+                usuario.getNomeDeUsuario(),
+                usuario.getEmail(),
+                usuario.getAssinatura());
+
+        return response;
     }
 }
 
