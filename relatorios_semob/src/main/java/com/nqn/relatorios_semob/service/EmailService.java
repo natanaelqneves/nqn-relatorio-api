@@ -73,7 +73,7 @@ public class EmailService {
             dinamicMailSender.setHost("smtp.gmail.com");
             dinamicMailSender.setPort(587);
 
-            dinamicMailSender.setUsername(usuarioLogado.getEmailSmtp());   // ex: agente.nael@gmail.com
+            dinamicMailSender.setUsername(usuarioLogado.getEmailSmtp());
             String senhaSmtpOriginal = criptografiaUtil.descriptografar(usuarioLogado.getSenhaAppSmtp());
             dinamicMailSender.setPassword(senhaSmtpOriginal);
 
@@ -90,7 +90,7 @@ public class EmailService {
             String mes = mesTraduzido.substring(0, 1).toUpperCase() + mesTraduzido.substring(1);
 
             helper.setFrom(usuarioLogado.getEmailSmtp());
-            helper.setTo(usuarioLogado.getEmail());
+            helper.setTo(emailDestinatario);
             helper.setSubject("Relatórios de Serviço do mês " + mes + ".");
             helper.setText("<p>Olá,</p><p>Seguem em anexo os relatórios de serviço do mês de " + mes + ".</p>", true);
 

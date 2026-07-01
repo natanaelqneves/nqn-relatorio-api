@@ -1,16 +1,13 @@
 package com.nqn.relatorios_semob.controller;
 
 
-import com.nqn.relatorios_semob.dto.OcorrenciaViaRequestDTO;
 import com.nqn.relatorios_semob.dto.RelatorioRequestDTO;
 import com.nqn.relatorios_semob.dto.RelatorioResponseDTO;
-import com.nqn.relatorios_semob.model.OcorrenciaVia;
 import com.nqn.relatorios_semob.model.Relatorio;
 import com.nqn.relatorios_semob.model.Usuario;
 import com.nqn.relatorios_semob.service.DocxService;
 import com.nqn.relatorios_semob.service.OcorrenciaViaService;
 import com.nqn.relatorios_semob.service.RelatorioService;
-import jakarta.validation.Valid;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -19,7 +16,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/relatorios")
@@ -73,7 +69,7 @@ public class RelatorioController {
     }
 
     @GetMapping("/{id}/doc")
-    public ResponseEntity<byte[]> baixarPdfRelatorio(
+    public ResponseEntity<byte[]> baixarDocRelatorio(
             @PathVariable Long id,
             @AuthenticationPrincipal Usuario usuarioLogado){
 
