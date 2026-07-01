@@ -79,7 +79,7 @@ public class EmailService {
 
             JavaMailSenderImpl dinamicMailSender = new JavaMailSenderImpl();
             dinamicMailSender.setHost("smtp.gmail.com");
-            dinamicMailSender.setPort(465); // 👈 Porta SSL
+            dinamicMailSender.setPort(587);
 
             String senhaSmtpOriginal = criptografiaUtil.descriptografar(usuarioLogado.getSenhaAppSmtp());
 
@@ -91,9 +91,9 @@ public class EmailService {
             props.put("mail.smtp.auth", "true");
             props.put("mail.debug", "false");
 
-            props.put("mail.smtp.ssl.enable", "true");
-            props.put("mail.smtp.starttls.enable", "false");
-            props.put("mail.smtp.starttls.required", "false");
+            props.put("mail.smtp.ssl.enable", "false");
+            props.put("mail.smtp.starttls.enable", "true");
+            props.put("mail.smtp.starttls.required", "true");
             props.put("mail.smtp.ssl.protocols", "TLSv1.2 TLSv1.3");
 
             props.put("mail.smtp.connectiontimeout", "10000");
