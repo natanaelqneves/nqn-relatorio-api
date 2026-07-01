@@ -48,7 +48,7 @@ public class Relatorio {
     @Column(columnDefinition = "TEXT")
     private String avarias;
 
-    @OneToMany(mappedBy = "relatorio", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "relatorio", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<OcorrenciaVia> ocorrencias;
 
     public Relatorio() {
