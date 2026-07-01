@@ -15,6 +15,8 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.util.StringUtils;
+
 import java.util.Properties;
 import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
@@ -55,6 +57,12 @@ public class EmailService {
 
         try {
             List<Relatorio> relatorios = relatorioRepository.findAllById(idsRelatorios);
+
+            if (relatorios.isEmpty()) {
+                System.err.println("Nenhum relatório foi encontrado para os IDs informados.");
+                return;
+            }
+
             Map<String, byte[]> arquivosDocx = new HashMap<>();
 
             //Gera o DOCX de cada relatório
@@ -83,11 +91,21 @@ public class EmailService {
             props.put("mail.smtp.starttls.enable", "true");
             props.put("mail.debug", "false");
 
+            // Força o uso do TLS e evita que a conexão fique aberta indefinidamente em caso de falha
+            props.put("mail.smtp.starttls.required", "true");
+            props.put("mail.smtp.ssl.protocols", "TLSv1.2 TLSv1.3"); // Garante compatibilidade moderna
+
+            // TIMEOUTS CRUCIAIS (Em milissegundos)
+            props.put("mail.smtp.connectiontimeout", "10000"); // 10 segundos para conseguir conectar
+            props.put("mail.smtp.timeout", "10000");           // 10 segundos esperando resposta de envio
+            props.put("mail.smtp.writetimeout", "10000");      // 10 segundos enviando os bytes do arquivo
+
             MimeMessage message = dinamicMailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
             String mesTraduzido = relatorios.get(0).getDataDoServico().getMonth().getDisplayName(TextStyle.FULL, new Locale("pt", "BR"));
-            String mes = mesTraduzido.substring(0, 1).toUpperCase() + mesTraduzido.substring(1);
+            //String mes = mesTraduzido.substring(0, 1).toUpperCase() + mesTraduzido.substring(1);
+            String mes = StringUtils.capitalize(mesTraduzido);
 
             helper.setFrom(usuarioLogado.getEmailSmtp());
             helper.setTo(emailDestinatario);
@@ -113,40 +131,3 @@ public class EmailService {
         return "Noturno";
     }
 }
-
-//    public void lembrarSenha(EmailRecuperacaoDTO dto) {
-//        Usuario usuario = usuarioService.buscarPorEmail(dto.email()).
-//                orElseThrow(() -> new EntityNotFoundException("Conta não encontrada para o email: " + dto.email()));
-//
-//        JavaMailSenderImpl dinamicMailSender = new JavaMailSenderImpl();
-//        dinamicMailSender.setHost("smtp.gmail.com");
-//        dinamicMailSender.setPort(587);
-//
-//        dinamicMailSender.setUsername("usuarioLogado.getEmailSmtp()");
-//        String senhaSmtpOriginal = criptografiaUtil.descriptografar("usuarioLogado.getSenhaAppSmtp()");
-//        dinamicMailSender.setPassword(senhaSmtpOriginal);
-//
-//        Properties props = dinamicMailSender.getJavaMailProperties();
-//        props.put("mail.transport.protocol", "smtp");
-//        props.put("mail.smtp.auth", "true");
-//        props.put("mail.smtp.starttls.enable", "true");
-//        props.put("mail.debug", "false");
-//
-//        MimeMessage message = dinamicMailSender.createMimeMessage();
-//        MimeMessageHelper helper = null;
-//
-//        try {
-//            helper = new MimeMessageHelper(message, true, "UTF-8");
-//            helper.setFrom("usuarioLogado.getEmailSmtp()");
-//            helper.setTo(emailDestinatario);
-//            helper.setSubject("Recuperação de Senha");
-//            helper.setText("<p>Olá,</p><p>A sua senha é: " + usuario.getPassword() + ".</p>", true);
-//
-//            dinamicMailSender.send(message);
-//
-//        } catch (MessagingException ex) {
-//            throw new RuntimeException(ex);
-//        } catch(Exception e){
-//        System.err.println("Falha ao processar ou enviar lote por e-mail: " + e.getMessage());
-//    }
-//}
