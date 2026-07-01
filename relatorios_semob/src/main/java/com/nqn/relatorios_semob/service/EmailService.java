@@ -79,7 +79,7 @@ public class EmailService {
 
             JavaMailSenderImpl dinamicMailSender = new JavaMailSenderImpl();
             dinamicMailSender.setHost("smtp.gmail.com");
-            dinamicMailSender.setPort(587);
+            dinamicMailSender.setPort(465); // 👈 Porta SSL
 
             dinamicMailSender.setUsername(usuarioLogado.getEmailSmtp());
             String senhaSmtpOriginal = criptografiaUtil.descriptografar(usuarioLogado.getSenhaAppSmtp());
@@ -88,12 +88,13 @@ public class EmailService {
             Properties props = dinamicMailSender.getJavaMailProperties();
             props.put("mail.transport.protocol", "smtp");
             props.put("mail.smtp.auth", "true");
-            props.put("mail.smtp.starttls.enable", "true");
             props.put("mail.debug", "false");
 
-            // Força o uso do TLS e evita que a conexão fique aberta indefinidamente em caso de falha
-            props.put("mail.smtp.starttls.required", "true");
-            props.put("mail.smtp.ssl.protocols", "TLSv1.2 TLSv1.3"); // Garante compatibilidade moderna
+            // 👇 AJUSTE ESSENCIAIS PARA A PORTA 465 FUNCIONAR:
+            props.put("mail.smtp.ssl.enable", "true");           // Ativa o SSL nativo exigido pela porta 465
+            props.put("mail.smtp.starttls.enable", "false");     // Desativa o STARTTLS (que era usado na 587)
+            props.put("mail.smtp.starttls.required", "false");   // Desativa a obrigatoriedade do STARTTLS
+            props.put("mail.smtp.ssl.protocols", "TLSv1.2 TLSv1.3"); // Mantém os protocolos modernos e seguros
 
             // TIMEOUTS CRUCIAIS (Em milissegundos)
             props.put("mail.smtp.connectiontimeout", "10000"); // 10 segundos para conseguir conectar
@@ -104,7 +105,6 @@ public class EmailService {
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
             String mesTraduzido = relatorios.get(0).getDataDoServico().getMonth().getDisplayName(TextStyle.FULL, new Locale("pt", "BR"));
-            //String mes = mesTraduzido.substring(0, 1).toUpperCase() + mesTraduzido.substring(1);
             String mes = StringUtils.capitalize(mesTraduzido);
 
             helper.setFrom(usuarioLogado.getEmailSmtp());
