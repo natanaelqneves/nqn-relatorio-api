@@ -90,7 +90,7 @@ public class EmailService {
             String mes = mesTraduzido.substring(0, 1).toUpperCase() + mesTraduzido.substring(1);
 
             helper.setFrom(usuarioLogado.getEmailSmtp());
-            helper.setTo(usuarioLogado.getEmail());//emailDestinatario
+            helper.setTo(usuarioLogado.getEmail());
             helper.setSubject("Relatórios de Serviço do mês " + mes + ".");
             helper.setText("<p>Olá,</p><p>Seguem em anexo os relatórios de serviço do mês de " + mes + ".</p>", true);
 
