@@ -81,8 +81,9 @@ public class EmailService {
             dinamicMailSender.setHost("smtp.gmail.com");
             dinamicMailSender.setPort(465); // 👈 Porta SSL
 
-            dinamicMailSender.setUsername(usuarioLogado.getEmailSmtp());
             String senhaSmtpOriginal = criptografiaUtil.descriptografar(usuarioLogado.getSenhaAppSmtp());
+
+            dinamicMailSender.setUsername(usuarioLogado.getEmailSmtp());
             dinamicMailSender.setPassword(senhaSmtpOriginal);
 
             Properties props = dinamicMailSender.getJavaMailProperties();
@@ -90,16 +91,14 @@ public class EmailService {
             props.put("mail.smtp.auth", "true");
             props.put("mail.debug", "false");
 
-            // 👇 AJUSTE ESSENCIAIS PARA A PORTA 465 FUNCIONAR:
-            props.put("mail.smtp.ssl.enable", "true");           // Ativa o SSL nativo exigido pela porta 465
-            props.put("mail.smtp.starttls.enable", "false");     // Desativa o STARTTLS (que era usado na 587)
-            props.put("mail.smtp.starttls.required", "false");   // Desativa a obrigatoriedade do STARTTLS
-            props.put("mail.smtp.ssl.protocols", "TLSv1.2 TLSv1.3"); // Mantém os protocolos modernos e seguros
+            props.put("mail.smtp.ssl.enable", "true");
+            props.put("mail.smtp.starttls.enable", "false");
+            props.put("mail.smtp.starttls.required", "false");
+            props.put("mail.smtp.ssl.protocols", "TLSv1.2 TLSv1.3");
 
-            // TIMEOUTS CRUCIAIS (Em milissegundos)
-            props.put("mail.smtp.connectiontimeout", "10000"); // 10 segundos para conseguir conectar
-            props.put("mail.smtp.timeout", "10000");           // 10 segundos esperando resposta de envio
-            props.put("mail.smtp.writetimeout", "10000");      // 10 segundos enviando os bytes do arquivo
+            props.put("mail.smtp.connectiontimeout", "10000");
+            props.put("mail.smtp.timeout", "10000");
+            props.put("mail.smtp.writetimeout", "10000");
 
             MimeMessage message = dinamicMailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
@@ -121,6 +120,7 @@ public class EmailService {
 
         } catch (Exception e) {
             System.err.println("Falha ao processar ou enviar lote por e-mail: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
