@@ -1,10 +1,9 @@
 package com.nqn.relatorios_semob.service;
 
 
-import com.nqn.relatorios_semob.dto.OcorrenciaViaRequestDTO;
+import com.nqn.relatorios_semob.dto.OcorrenciaRequestDTO;
 import com.nqn.relatorios_semob.model.OcorrenciaVia;
 import com.nqn.relatorios_semob.model.Relatorio;
-import com.nqn.relatorios_semob.model.Usuario;
 import com.nqn.relatorios_semob.repository.OcorrenciaViaRepository;
 import com.nqn.relatorios_semob.repository.RelatorioRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -23,7 +22,7 @@ public class OcorrenciaViaService {
     }
 
     @Transactional
-    public OcorrenciaVia salvarOcorrencia(Long relatorioId, OcorrenciaViaRequestDTO dto) {
+    public OcorrenciaVia salvarOcorrencia(Long relatorioId, OcorrenciaRequestDTO dto) {
         System.out.println(dto);
         Relatorio relatorio = relatorioRepository.findById(relatorioId)
                 .orElseThrow(() -> new EntityNotFoundException("Relatório não encontrado com o ID: " + relatorioId));

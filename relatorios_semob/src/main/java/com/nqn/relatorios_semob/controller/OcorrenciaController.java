@@ -1,6 +1,6 @@
 package com.nqn.relatorios_semob.controller;
 
-import com.nqn.relatorios_semob.dto.OcorrenciaViaRequestDTO;
+import com.nqn.relatorios_semob.dto.OcorrenciaRequestDTO;
 import com.nqn.relatorios_semob.model.OcorrenciaVia;
 import com.nqn.relatorios_semob.service.OcorrenciaViaService;
 import jakarta.validation.Valid;
@@ -20,11 +20,11 @@ public class OcorrenciaController {
 
     @PostMapping("/{id}")
     public ResponseEntity<OcorrenciaVia> adicionarOcorrencia(
-            @PathVariable Long id,
-            @Valid @RequestBody OcorrenciaViaRequestDTO dto
+            @PathVariable Long relatorioId,
+            @Valid @RequestBody OcorrenciaRequestDTO ocorrenticaDTO
             ) {
 
-        OcorrenciaVia ocorrencia = ocorrenciaViaService.salvarOcorrencia(id, dto);
+        OcorrenciaVia ocorrencia = ocorrenciaViaService.salvarOcorrencia(relatorioId, ocorrenticaDTO);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(ocorrencia);
     }

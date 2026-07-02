@@ -1,6 +1,6 @@
 package com.nqn.relatorios_semob.dto;
 
-public record OcorrenciaViaResponseDTO(
+public record OcorrenciaResponseDTO(
         Long id,
         String descricaoDefeito,
         String urlFoto,

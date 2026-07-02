@@ -1,7 +1,6 @@
 package com.nqn.relatorios_semob.service;
 
 
-import com.nqn.relatorios_semob.dto.OcorrenciaViaResponseDTO;
 import com.nqn.relatorios_semob.dto.RelatorioRequestDTO;
 import com.nqn.relatorios_semob.dto.RelatorioResponseDTO;
 import com.nqn.relatorios_semob.model.Relatorio;
