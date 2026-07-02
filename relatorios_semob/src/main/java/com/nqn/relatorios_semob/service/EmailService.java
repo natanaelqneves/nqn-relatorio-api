@@ -124,10 +124,47 @@ public class EmailService {
         }
     }
 
-    private String turno(Relatorio relatorio) {
-        if(relatorio.getHoraIncio() < 19){
-            return "Diurno";
+    public byte[] baixarRelatoriosZip(
+            List<Long> idsRelatorios,
+            Usuario usuarioLogado) {
+
+        try {
+            List<Relatorio> relatorios = relatorioRepository.findAllById(idsRelatorios);
+
+            if (relatorios.isEmpty()) {
+                throw new RuntimeException("Nenhum relatório foi encontrado para os IDs informados.");
+            }
+
+            Map<String, byte[]> arquivosDocx = new HashMap<>();
+
+            //Gera o DOCX de cada relatório
+            for (Relatorio r : relatorios) {
+                byte[] docxBytes = docxService.gerarDocx(r);
+
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+                String nomeArquivo = "Relatorio_" + r.getUsuario().getNomeCompleto() + "_" + r.getDataDoServico().format(formatter) +"_"+ turno(r) + ".docx";
+                arquivosDocx.put(nomeArquivo, docxBytes);
+            }
+
+            byte[] zipBytes = zipService.compactarArquivos(arquivosDocx);
+
+            arquivosDocx.clear();
+            System.gc();
+
+            return zipBytes;
+
+        } catch (Exception e) {
+            System.err.println("Falha ao processar ou enviar lote por e-mail: " + e.getMessage());
+            throw new RuntimeException("Erro ao gerar o arquivo ZIP", e);
         }
-        return "Noturno";
+    }
+
+    private String turno(Relatorio relatorio) {
+        if(relatorio.getHorasPlantao() > 12){
+            return "Dia-Noite";
+        } else if (relatorio.getHoraIncio() < 19){
+            return "Dia";
+        }
+        return "Noite";
     }
 }
