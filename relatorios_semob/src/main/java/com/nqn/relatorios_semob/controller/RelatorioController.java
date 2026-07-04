@@ -8,6 +8,7 @@ import com.nqn.relatorios_semob.model.Usuario;
 import com.nqn.relatorios_semob.service.DocxService;
 import com.nqn.relatorios_semob.service.OcorrenciaViaService;
 import com.nqn.relatorios_semob.service.RelatorioService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -23,17 +24,15 @@ public class RelatorioController {
 
     private final RelatorioService relatorioService;
     private final DocxService docxService;
-    private final OcorrenciaViaService ocorrenciaViaService;
 
-    public RelatorioController(RelatorioService relatorioService, DocxService docxService, OcorrenciaViaService ocorrenciaViaService) {
+    public RelatorioController(RelatorioService relatorioService, DocxService docxService) {
         this.relatorioService = relatorioService;
         this.docxService = docxService;
-        this.ocorrenciaViaService = ocorrenciaViaService;
     }
 
     @PostMapping
-    public ResponseEntity<RelatorioResponseDTO> cadastrarRelatorio(
-            @RequestBody RelatorioRequestDTO dto,
+    public ResponseEntity<RelatorioResponseDTO> cadastrar(
+            @Valid @RequestBody RelatorioRequestDTO dto,
             @AuthenticationPrincipal Usuario usuarioLogado){
 
             RelatorioResponseDTO relatorioResponseDTO = relatorioService.cadastrar(dto,usuarioLogado);
@@ -41,11 +40,12 @@ public class RelatorioController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<RelatorioResponseDTO> atualizarRelatorio(
+    public ResponseEntity<RelatorioResponseDTO> atualizar(
             @PathVariable Long id,
-            @RequestBody RelatorioRequestDTO dto){
+            @Valid @RequestBody RelatorioRequestDTO dto,
+            @AuthenticationPrincipal Usuario usuarioLogado){
 
-        RelatorioResponseDTO relatorioResponseDTO = relatorioService.atualizar(id, dto);
+        RelatorioResponseDTO relatorioResponseDTO = relatorioService.atualizar(id, dto, usuarioLogado);
         return ResponseEntity.status(HttpStatus.OK).body(relatorioResponseDTO);
     }
 
@@ -54,22 +54,23 @@ public class RelatorioController {
             @PathVariable Long id,
             @AuthenticationPrincipal Usuario usuarioLogado){
         Relatorio relatorio =  relatorioService.buscarPorIdEUsuario(id, usuarioLogado);
-        RelatorioResponseDTO response = relatorioService.converteRelatorioResponse(relatorio);
+        RelatorioResponseDTO response = relatorioService.gerarRelatorioResponse(relatorio);
 
         return ResponseEntity.ok(response);
     }
 
     @GetMapping
-    public ResponseEntity<List<RelatorioResponseDTO>> listarRelatoriosPorDataDeServico(
+    public ResponseEntity<List<RelatorioResponseDTO>> listarPorDataDeServico(
             @AuthenticationPrincipal Usuario usuarioLogado,
             @RequestParam(value = "dataInicio", required = false) String dataInicio,
             @RequestParam(value = "dataFim", required = false) String dataFim){
-        List<RelatorioResponseDTO> relatorios = relatorioService.listarRelatoriosPorUsuarioEPeriodo(usuarioLogado, dataInicio, dataFim);
+        List<RelatorioResponseDTO> relatorios = relatorioService.listarPorUsuarioEPeriodo(usuarioLogado, dataInicio, dataFim);
+
         return ResponseEntity.ok(relatorios);
     }
 
     @GetMapping("/{id}/doc")
-    public ResponseEntity<byte[]> baixarDocRelatorio(
+    public ResponseEntity<byte[]> baixar(
             @PathVariable Long id,
             @AuthenticationPrincipal Usuario usuarioLogado){
 
@@ -86,7 +87,7 @@ public class RelatorioController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletarPorId(
+    public ResponseEntity<Void> apagarPorId(
             @PathVariable Long id,
             @AuthenticationPrincipal Usuario usuarioLogado){
         Relatorio relatorio = relatorioService.buscarPorIdEUsuario(id, usuarioLogado);
@@ -94,6 +95,7 @@ public class RelatorioController {
         if (relatorio.getUsuario() == null || !relatorio.getUsuario().getId().equals(usuarioLogado.getId())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
+
         relatorioService.apagarRelatorio(id);
         return ResponseEntity.noContent().build();
     }

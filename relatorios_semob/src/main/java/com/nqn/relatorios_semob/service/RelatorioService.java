@@ -20,93 +20,58 @@ public class RelatorioService {
 
     private final RelatorioRepository relatorioRepository;
     private final ViaturaService viaturaService;
-    private final OcorrenciaViaService ocorrenciaViaService;
-
-    public RelatorioService(RelatorioRepository relatorioRepository, ViaturaService viaturaService, OcorrenciaViaService ocorrenciaViaService) {
+    public RelatorioService(RelatorioRepository relatorioRepository, ViaturaService viaturaService) {
         this.relatorioRepository = relatorioRepository;
         this.viaturaService = viaturaService;
-        this.ocorrenciaViaService = ocorrenciaViaService;
     }
 
     @Transactional
     public RelatorioResponseDTO cadastrar(RelatorioRequestDTO dto, Usuario usuarioLogado) {
-        Viatura viatura = viaturaService.buscarViaturaPorPlaca(dto.placaViatura());
-        viatura.setKmAtual(dto.kmFinal());
+        Relatorio novoRelatorio = gerarRelatorio(new Relatorio(), dto, usuarioLogado);
+        Relatorio relatorioSalvo = relatorioRepository.save(novoRelatorio);
 
-        Integer horaFim = (dto.horaInicio() + dto.horasPlantao()) % 24;
-
-        Relatorio relatorio = new Relatorio();
-
-        relatorio.setUsuario(usuarioLogado);
-        relatorio.setDataDoServico(dto.dataDoServico());
-        relatorio.setHorasPlantao(dto.horasPlantao());
-        relatorio.setHoraIncio(dto.horaInicio());
-        relatorio.setHoraFinal(horaFim);
-        relatorio.setViatura(viatura);
-        relatorio.setKmInicial(dto.kmInicial());
-        relatorio.setKmFinal(dto.kmFinal());
-        relatorio.setDescricaoServico(dto.descricaoServico());
-        relatorio.setAvarias(dto.avarias());
-        relatorio.setSinistro(dto.sinistro());
-
-        Relatorio relatorioSalvo = relatorioRepository.save(relatorio);
-
-        return novoRelatorioResponse(relatorioSalvo);
+        return gerarRelatorioResponse(relatorioSalvo);
     }
 
     @Transactional
-    public RelatorioResponseDTO atualizar(Long id, RelatorioRequestDTO dto){
-        if (!relatorioRepository.existsById(id)) {
-            throw new EntityNotFoundException("Relatório não encontrado com o ID: " + id);
+    public RelatorioResponseDTO atualizar(Long id, RelatorioRequestDTO dto, Usuario usuarioLogado){
+        Relatorio relatorioEncontrado = relatorioRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Relatório não encontrado com o ID: " + id));
+
+        boolean usuariosSaoIguais = relatorioEncontrado.getUsuario() != null && relatorioEncontrado.getUsuario().getId().equals(usuarioLogado.getId());
+
+        if(!usuariosSaoIguais) {
+            throw  new RuntimeException("Usuario não autorizado a alterar o relatório.");
         }
 
-        Viatura viatura = viaturaService.buscarViaturaPorPlaca(dto.placaViatura());
-        viatura.setKmAtual(dto.kmFinal());
+        Relatorio relatorioAtualizado = gerarRelatorio(relatorioEncontrado, dto, usuarioLogado);
+        relatorioRepository.save(relatorioAtualizado);
 
-        Relatorio relatorio = relatorioRepository.getReferenceById(id);
-
-        Integer horaFim = (dto.horaInicio() + dto.horasPlantao()) % 24;
-
-        relatorio.setDataDoServico(dto.dataDoServico());
-        relatorio.setHorasPlantao(dto.horasPlantao());
-        relatorio.setHoraIncio(dto.horaInicio());
-        relatorio.setHoraFinal(horaFim);
-        relatorio.setViatura(viatura);
-        relatorio.setKmInicial(dto.kmInicial());
-        relatorio.setKmFinal(dto.kmFinal());
-        relatorio.setDescricaoServico(dto.descricaoServico());
-        relatorio.setAvarias(dto.avarias());
-        relatorio.setSinistro(dto.sinistro());
-
-        relatorioRepository.save(relatorio);
-
-        RelatorioResponseDTO response = novoRelatorioResponse(relatorio);
-
-        return response;
+        return gerarRelatorioResponse(relatorioAtualizado);
     }
 
     @Transactional
-    public List<RelatorioResponseDTO> listarRelatorios(){
+    public List<RelatorioResponseDTO> buscarTodos(){
         List<RelatorioResponseDTO> listaDeRelatorios = new ArrayList<>();
 
         relatorioRepository.findAll().
                 stream()
-                .map(this::novoRelatorioResponse)
+                .map(this::gerarRelatorioResponse)
                 .toList();
 
         return listaDeRelatorios;
     }
 
-    public List<RelatorioResponseDTO> listarRelatoriosPorDataDoServico(){
+    public List<RelatorioResponseDTO> listarOrdenadoPorDataDoServico(){
         List<RelatorioResponseDTO> listaDeRelatorios = new ArrayList<>();
 
         relatorioRepository.findAllByOrderByDataDoServicoDesc().forEach(relatorio ->
-                listaDeRelatorios.add(novoRelatorioResponse(relatorio)));
+                listaDeRelatorios.add(gerarRelatorioResponse(relatorio)));
 
         return listaDeRelatorios;
     }
 
-    public List<RelatorioResponseDTO> listarRelatoriosPorUsuarioEPeriodo(
+    public List<RelatorioResponseDTO> listarPorUsuarioEPeriodo(
             Usuario usuarioLogado,
             String dataInicioStr,
             String dataFimStr){
@@ -126,7 +91,7 @@ public class RelatorioService {
         }
 
         relatorios.forEach(relatorio ->
-                listaDeRelatorios.add(novoRelatorioResponse(relatorio)));
+                listaDeRelatorios.add(gerarRelatorioResponse(relatorio)));
 
         return listaDeRelatorios;
     }
@@ -145,7 +110,7 @@ public class RelatorioService {
         return relatorio;
     }
 
-    private RelatorioResponseDTO novoRelatorioResponse(Relatorio relatorio) {
+    public RelatorioResponseDTO gerarRelatorioResponse(Relatorio relatorio) {
         return new RelatorioResponseDTO(
                 relatorio.getId(),
                 relatorio.getUsuario().getNomeCompleto(),
@@ -165,24 +130,23 @@ public class RelatorioService {
         );
     }
 
-    public RelatorioResponseDTO converteRelatorioResponse(Relatorio relatorio) {
-        return new RelatorioResponseDTO(
-                relatorio.getId(),
-                relatorio.getUsuario().getNomeCompleto(),
-                relatorio.getUsuario().getMatricula(),
-                relatorio.getUsuario().getEmail(),
-                relatorio.getDataDoServico(),
-                relatorio.getHorasPlantao(),
-                relatorio.getHoraIncio(),
-                relatorio.getHoraFinal(),
-                relatorio.getViatura().getPlaca(),
-                relatorio.getKmInicial(),
-                relatorio.getKmFinal(),
-                relatorio.getDescricaoServico(),
-                relatorio.getSinistro(),
-                relatorio.getAvarias(),
-                relatorio.getOcorrencias()
-        );
+    private Relatorio gerarRelatorio(Relatorio relatorio, RelatorioRequestDTO dto, Usuario usuarioLogado) {
+        Viatura viatura = viaturaService.buscarViaturaPorPlaca(dto.placaViatura());
+        viatura.setKmAtual(dto.kmFinal());
+
+        Integer horaFim = (dto.horaInicio() + dto.horasPlantao()) % 24;
+        relatorio.setUsuario(usuarioLogado);
+        relatorio.setDataDoServico(dto.dataDoServico());
+        relatorio.setHorasPlantao(dto.horasPlantao());
+        relatorio.setHoraIncio(dto.horaInicio());
+        relatorio.setHoraFinal(horaFim);
+        relatorio.setViatura(viatura);
+        relatorio.setKmInicial(dto.kmInicial());
+        relatorio.setKmFinal(dto.kmFinal());
+        relatorio.setDescricaoServico(dto.descricaoServico());
+        relatorio.setAvarias(dto.avarias());
+        relatorio.setSinistro(dto.sinistro());
+
+        return relatorio;
     }
 }
-

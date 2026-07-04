@@ -1,7 +1,7 @@
 package com.nqn.relatorios_semob.controller;
 
 import com.nqn.relatorios_semob.dto.OcorrenciaRequestDTO;
-import com.nqn.relatorios_semob.model.OcorrenciaVia;
+import com.nqn.relatorios_semob.dto.OcorrenciaResponseDTO;
 import com.nqn.relatorios_semob.service.OcorrenciaViaService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -19,13 +19,19 @@ public class OcorrenciaController {
     }
 
     @PostMapping("/{id}")
-    public ResponseEntity<OcorrenciaVia> adicionarOcorrencia(
+    public ResponseEntity<OcorrenciaResponseDTO> adicionarOcorrencia(
             @PathVariable Long relatorioId,
             @Valid @RequestBody OcorrenciaRequestDTO ocorrenticaDTO
             ) {
 
-        OcorrenciaVia ocorrencia = ocorrenciaViaService.salvarOcorrencia(relatorioId, ocorrenticaDTO);
+        OcorrenciaResponseDTO ocorrenciaResponseDTO = ocorrenciaViaService.salvarOcorrencia(relatorioId, ocorrenticaDTO);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(ocorrencia);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ocorrenciaResponseDTO);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> apagarPorId(
+            @PathVariable Long id){
+        ocorrenciaViaService.apagarPorId(id);
     }
 }
