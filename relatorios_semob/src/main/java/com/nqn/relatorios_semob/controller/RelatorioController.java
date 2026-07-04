@@ -6,8 +6,9 @@ import com.nqn.relatorios_semob.dto.RelatorioResponseDTO;
 import com.nqn.relatorios_semob.model.Relatorio;
 import com.nqn.relatorios_semob.model.Usuario;
 import com.nqn.relatorios_semob.service.DocxService;
-import com.nqn.relatorios_semob.service.OcorrenciaViaService;
 import com.nqn.relatorios_semob.service.RelatorioService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -20,6 +21,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/relatorios")
+@Tag(name = "Relatórios", description = "Criação, e manipulação de relatorios e emissão de documentos.")
 public class RelatorioController {
 
     private final RelatorioService relatorioService;
@@ -30,6 +32,7 @@ public class RelatorioController {
         this.docxService = docxService;
     }
 
+    @Operation(summary = "Cadastra novo relatório.", description = "Recebe os dados inseridos pelo agente de serviço.")
     @PostMapping
     public ResponseEntity<RelatorioResponseDTO> cadastrar(
             @Valid @RequestBody RelatorioRequestDTO dto,
@@ -39,6 +42,7 @@ public class RelatorioController {
             return ResponseEntity.status(HttpStatus.CREATED).body(relatorioResponseDTO);
     }
 
+    @Operation(summary = "Atualiza relatório existente.", description = "Recebe os dados alterados pelo agente de serviço.")
     @PutMapping("/{id}")
     public ResponseEntity<RelatorioResponseDTO> atualizar(
             @PathVariable Long id,
@@ -49,6 +53,7 @@ public class RelatorioController {
         return ResponseEntity.status(HttpStatus.OK).body(relatorioResponseDTO);
     }
 
+    @Operation(summary = "Busca relatório.", description = "Busca relatório específico por ID.")
     @GetMapping("/{id}")
     public ResponseEntity<RelatorioResponseDTO> buscarPorId(
             @PathVariable Long id,
@@ -59,6 +64,7 @@ public class RelatorioController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "Busca relatórios.", description = "Busca relatórios por interfalo de datas específicas de lançamento.")
     @GetMapping
     public ResponseEntity<List<RelatorioResponseDTO>> listarPorDataDeServico(
             @AuthenticationPrincipal Usuario usuarioLogado,
@@ -69,6 +75,7 @@ public class RelatorioController {
         return ResponseEntity.ok(relatorios);
     }
 
+    @Operation(summary = "Baixar relatório.", description = "Baixa relatório específico por ID.")
     @GetMapping("/{id}/doc")
     public ResponseEntity<byte[]> baixar(
             @PathVariable Long id,
@@ -86,6 +93,7 @@ public class RelatorioController {
                 .body(pdfBytes);
     }
 
+    @Operation(summary = "Apaga relatório.", description = "Apaga relatório específico por ID.")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> apagarPorId(
             @PathVariable Long id,
@@ -96,7 +104,8 @@ public class RelatorioController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        relatorioService.apagarRelatorio(id);
+        relatorioService.apagarRelatorio(id, usuarioLogado);
+
         return ResponseEntity.noContent().build();
     }
 }

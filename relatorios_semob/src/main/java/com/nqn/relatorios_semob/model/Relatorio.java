@@ -49,7 +49,7 @@ public class Relatorio {
     private String avarias;
 
     @OneToMany(mappedBy = "relatorio", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    private List<OcorrenciaVia> ocorrencias;
+    private List<Ocorrencia> ocorrencias;
 
     public Relatorio() {
     }
@@ -165,11 +165,11 @@ public class Relatorio {
         this.avarias = avarias;
     }
 
-    public List<OcorrenciaVia> getOcorrencias() {
+    public List<Ocorrencia> getOcorrencias() {
         return ocorrencias;
     }
 
-    public void setOcorrencias(List<OcorrenciaVia> ocorrencias) {
+    public void setOcorrencias(List<Ocorrencia> ocorrencias) {
         this.ocorrencias = ocorrencias;
     }
 

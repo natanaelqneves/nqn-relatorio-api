@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "tb_ocorrencia")
-public class OcorrenciaVia {
+public class Ocorrencia {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,11 +33,11 @@ public class OcorrenciaVia {
     @Column(name = "data_registro")
     private LocalDateTime dataRegistro;
 
-    public OcorrenciaVia() {
+    public Ocorrencia() {
         this.dataRegistro = LocalDateTime.now();
     }
 
-    public OcorrenciaVia(Long id, Relatorio relatorio, String urlFoto, String descricaoDefeito, Double latitude, Double longitude, LocalDateTime dataRegistro) {
+    public Ocorrencia(Long id, Relatorio relatorio, String urlFoto, String descricaoDefeito, Double latitude, Double longitude, LocalDateTime dataRegistro) {
         this.id = id;
         this.relatorio = relatorio;
         this.urlFoto = urlFoto;

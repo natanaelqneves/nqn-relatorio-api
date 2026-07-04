@@ -2,7 +2,7 @@ package com.nqn.relatorios_semob.controller;
 
 import com.nqn.relatorios_semob.dto.AutenticacaoDTO;
 import com.nqn.relatorios_semob.dto.TokenResponseDTO;
-import com.nqn.relatorios_semob.service.AutenticacaoService;
+import com.nqn.relatorios_semob.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -12,17 +12,17 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/login")
-public class AutenticacaoController {
+public class AuthController {
 
-    private AutenticacaoService autenticacaoService;
+    private AuthService authService;
 
-    public AutenticacaoController(AutenticacaoService autenticacaoService) {
-        this.autenticacaoService = autenticacaoService;
+    public AuthController(AuthService authService) {
+        this.authService = authService;
     }
 
     @PostMapping
     public ResponseEntity<TokenResponseDTO> autenticar(@RequestBody @Valid AutenticacaoDTO dto) {
-        String token = autenticacaoService.login(dto);
+        String token = authService.login(dto);
 
         return ResponseEntity.ok(new TokenResponseDTO(token));
     }

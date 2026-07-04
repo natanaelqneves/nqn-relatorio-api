@@ -10,13 +10,13 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.stereotype.Service;
 
 @Service
-public class AutenticacaoService {
+public class AuthService {
 
     private UsuarioRepository usuarioRepository;
     private JwtService jwtService;
     private AuthenticationManager authenticationManager;
 
-    public AutenticacaoService(UsuarioRepository usuarioRepository, JwtService jwtService, AuthenticationManager authenticationManager) {
+    public AuthService(UsuarioRepository usuarioRepository, JwtService jwtService, AuthenticationManager authenticationManager) {
         this.usuarioRepository = usuarioRepository;
         this.jwtService = jwtService;
         this.authenticationManager = authenticationManager;

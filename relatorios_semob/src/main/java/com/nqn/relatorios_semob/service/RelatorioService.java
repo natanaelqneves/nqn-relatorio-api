@@ -27,6 +27,7 @@ public class RelatorioService {
 
     @Transactional
     public RelatorioResponseDTO cadastrar(RelatorioRequestDTO dto, Usuario usuarioLogado) {
+        System.out.println(dto);
         Relatorio novoRelatorio = gerarRelatorio(new Relatorio(), dto, usuarioLogado);
         Relatorio relatorioSalvo = relatorioRepository.save(novoRelatorio);
 
@@ -50,25 +51,21 @@ public class RelatorioService {
         return gerarRelatorioResponse(relatorioAtualizado);
     }
 
-    @Transactional
     public List<RelatorioResponseDTO> buscarTodos(){
-        List<RelatorioResponseDTO> listaDeRelatorios = new ArrayList<>();
 
-        relatorioRepository.findAll().
+        return relatorioRepository.findAll().
                 stream()
                 .map(this::gerarRelatorioResponse)
                 .toList();
-
-        return listaDeRelatorios;
     }
 
     public List<RelatorioResponseDTO> listarOrdenadoPorDataDoServico(){
         List<RelatorioResponseDTO> listaDeRelatorios = new ArrayList<>();
 
-        relatorioRepository.findAllByOrderByDataDoServicoDesc().forEach(relatorio ->
-                listaDeRelatorios.add(gerarRelatorioResponse(relatorio)));
-
-        return listaDeRelatorios;
+        return relatorioRepository.findAllByOrderByDataDoServicoDesc()
+                .stream()
+                .map(this::gerarRelatorioResponse)
+                .toList();
     }
 
     public List<RelatorioResponseDTO> listarPorUsuarioEPeriodo(
@@ -96,18 +93,18 @@ public class RelatorioService {
         return listaDeRelatorios;
     }
 
-    public void apagarRelatorio(Long id) {
-        Relatorio relatorio = relatorioRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Relatório não encontrado com o ID: " + id));
+    public void apagarRelatorio(Long id, Usuario usuarioLogado) {
+        Relatorio relatorioEncontrado = relatorioRepository.findByIdAndUsuarioId(id, usuarioLogado.getId())
+                .orElseThrow(() -> new RuntimeException("Relatório não encontrado ou acesso não autorizado."));
 
-        relatorioRepository.deleteById(id);
+        relatorioRepository.delete(relatorioEncontrado);
     }
 
     public Relatorio buscarPorIdEUsuario(Long id, Usuario usuarioLogado) {
-        Relatorio relatorio = relatorioRepository.findByIdAndUsuarioId(id, usuarioLogado.getId())
-                .orElseThrow(() -> new RuntimeException("Relatório não encontrado com o ID: " + id));
+        Relatorio relatorioEncontrado = relatorioRepository.findByIdAndUsuarioId(id, usuarioLogado.getId())
+                .orElseThrow(() -> new RuntimeException("Relatório não encontrado ou acesso não autorizado."));
 
-        return relatorio;
+        return relatorioEncontrado;
     }
 
     public RelatorioResponseDTO gerarRelatorioResponse(Relatorio relatorio) {

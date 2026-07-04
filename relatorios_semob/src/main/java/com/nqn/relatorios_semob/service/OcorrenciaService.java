@@ -3,22 +3,22 @@ package com.nqn.relatorios_semob.service;
 
 import com.nqn.relatorios_semob.dto.OcorrenciaRequestDTO;
 import com.nqn.relatorios_semob.dto.OcorrenciaResponseDTO;
-import com.nqn.relatorios_semob.model.OcorrenciaVia;
+import com.nqn.relatorios_semob.model.Ocorrencia;
 import com.nqn.relatorios_semob.model.Relatorio;
-import com.nqn.relatorios_semob.repository.OcorrenciaViaRepository;
+import com.nqn.relatorios_semob.repository.OcorrenciaRepository;
 import com.nqn.relatorios_semob.repository.RelatorioRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 @Service
-public class OcorrenciaViaService {
+public class OcorrenciaService {
 
-    private final OcorrenciaViaRepository ocorrenciaViaRepository;
+    private final OcorrenciaRepository ocorrenciaRepository;
     private final RelatorioRepository relatorioRepository;
 
-    public OcorrenciaViaService(OcorrenciaViaRepository ocorrenciaViaRepository, RelatorioRepository relatorioRepository) {
-        this.ocorrenciaViaRepository = ocorrenciaViaRepository;
+    public OcorrenciaService(OcorrenciaRepository ocorrenciaRepository, RelatorioRepository relatorioRepository) {
+        this.ocorrenciaRepository = ocorrenciaRepository;
         this.relatorioRepository = relatorioRepository;
     }
 
@@ -28,7 +28,7 @@ public class OcorrenciaViaService {
         Relatorio relatorio = relatorioRepository.findById(relatorioId)
                 .orElseThrow(() -> new EntityNotFoundException("Relatório não encontrado com o ID: " + relatorioId));
 
-        OcorrenciaVia novaOcorrencia = new OcorrenciaVia();
+        Ocorrencia novaOcorrencia = new Ocorrencia();
 
         novaOcorrencia.setRelatorio(relatorio);
         novaOcorrencia.setUrlFoto(dto.urlFoto());
@@ -36,23 +36,23 @@ public class OcorrenciaViaService {
         novaOcorrencia.setLatitude(dto.latitude());
         novaOcorrencia.setLongitude(dto.longitude());
 
-        OcorrenciaVia ocorrenciaSalva = ocorrenciaViaRepository.save(novaOcorrencia);
+        Ocorrencia ocorrenciaSalva = ocorrenciaRepository.save(novaOcorrencia);
 
         return gerarOcorrenciaResponse(ocorrenciaSalva);
     }
 
     public void apagarPorId(Long ocorrenciaId) {
-        OcorrenciaVia ocorrencia = ocorrenciaViaRepository.findById(ocorrenciaId)
+        Ocorrencia ocorrencia = ocorrenciaRepository.findById(ocorrenciaId)
                 .orElseThrow(() -> new EntityNotFoundException("Ocorrência não encontrada com o ID: " + ocorrenciaId));
 
-        ocorrenciaViaRepository.deleteById(ocorrenciaId);
+        ocorrenciaRepository.deleteById(ocorrenciaId);
     }
 
     public void deletarPorIdRelatorio(Long id) {
-        ocorrenciaViaRepository.deleteByRelatorioId(id);
+        ocorrenciaRepository.deleteByRelatorioId(id);
     }
 
-    private OcorrenciaResponseDTO gerarOcorrenciaResponse(OcorrenciaVia ocorrencia){
+    private OcorrenciaResponseDTO gerarOcorrenciaResponse(Ocorrencia ocorrencia){
         return new OcorrenciaResponseDTO(
                 ocorrencia.getId(),
                 ocorrencia.getDescricaoDefeito(),
