@@ -20,6 +20,7 @@ public class RelatorioService {
 
     private final RelatorioRepository relatorioRepository;
     private final ViaturaService viaturaService;
+
     public RelatorioService(RelatorioRepository relatorioRepository, ViaturaService viaturaService) {
         this.relatorioRepository = relatorioRepository;
         this.viaturaService = viaturaService;
@@ -27,7 +28,7 @@ public class RelatorioService {
 
     @Transactional
     public RelatorioResponseDTO cadastrar(RelatorioRequestDTO dto, Usuario usuarioLogado) {
-        System.out.println(dto);
+
         Relatorio novoRelatorio = gerarRelatorio(new Relatorio(), dto, usuarioLogado);
         Relatorio relatorioSalvo = relatorioRepository.save(novoRelatorio);
 

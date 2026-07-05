@@ -99,10 +99,11 @@ public class UsuarioService {
     }
 
     @Transactional
-    public UsuarioResponseDTO mudarSenha(Long id, MudarSenhaDTO dto) {
+    public UsuarioResponseDTO mudarSenha(MudarSenhaDTO dto, Usuario usuarioLogado) {
 
-        Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado"));
+//        Usuario usuario = usuarioRepository.findById(id)
+//                .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado"));
+        Usuario usuario = usuarioLogado;
 
         String senhaCriptografada = passwordEncoder.encode(dto.senha().trim());
 

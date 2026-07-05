@@ -23,8 +23,7 @@ public class OcorrenciaService {
     }
 
     @Transactional
-    public OcorrenciaResponseDTO salvarOcorrencia(Long relatorioId, OcorrenciaRequestDTO dto) {
-        System.out.println(dto);
+    public OcorrenciaResponseDTO cadastrar(Long relatorioId, OcorrenciaRequestDTO dto) {
         Relatorio relatorio = relatorioRepository.findById(relatorioId)
                 .orElseThrow(() -> new EntityNotFoundException("Relatório não encontrado com o ID: " + relatorioId));
 
@@ -48,7 +47,7 @@ public class OcorrenciaService {
         ocorrenciaRepository.deleteById(ocorrenciaId);
     }
 
-    public void deletarPorIdRelatorio(Long id) {
+    public void apagarPorIdRelatorio(Long id) {
         ocorrenciaRepository.deleteByRelatorioId(id);
     }
 

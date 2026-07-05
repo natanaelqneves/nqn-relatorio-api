@@ -30,24 +30,19 @@ public class EmailService {
 
     @Value("${email.destinatario}")
     private String emailDestinatario;
-    private final JavaMailSender mailSender;
+
     private final RelatorioRepository relatorioRepository;
     private final DocxService docxService;
     private final ZipService zipService;
     private final CriptografiaUtil criptografiaUtil;
-    private final UsuarioService usuarioService;
 
-    public EmailService(JavaMailSender mailSender,
-                        RelatorioRepository relatorioRepository, DocxService docxService,
-                        ZipService zipService, CriptografiaUtil criptografiaUtil,
-                        UsuarioService usuarioService) {
 
-        this.mailSender = mailSender;
+    public EmailService(RelatorioRepository relatorioRepository, DocxService docxService,
+                        ZipService zipService, CriptografiaUtil criptografiaUtil) {
         this.relatorioRepository = relatorioRepository;
         this.docxService = docxService;
         this.zipService = zipService;
         this.criptografiaUtil = criptografiaUtil;
-        this.usuarioService = usuarioService;
     }
 
     @Async

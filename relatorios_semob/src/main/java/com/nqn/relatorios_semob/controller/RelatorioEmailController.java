@@ -3,6 +3,8 @@ package com.nqn.relatorios_semob.controller;
 import com.nqn.relatorios_semob.dto.EnvioLoteEmailDTO;
 import com.nqn.relatorios_semob.model.Usuario;
 import com.nqn.relatorios_semob.service.EmailService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -16,6 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/email")
+@Tag(name = "Serviço de E-mail", description = "Envio de E-email com os relatorios anexados em zip.")
+
 public class RelatorioEmailController {
 
     private final EmailService emailService;
@@ -24,6 +28,7 @@ public class RelatorioEmailController {
         this.emailService = emailService;
     }
 
+    @Operation(summary = "Envia relatorios por email.", description = "Os relatorios dos períodos requisitados são enviados zipados para o email da diretoria no formato doc.")
     @PostMapping
     public ResponseEntity<String> enviarLoteZip(
             @Valid @RequestBody EnvioLoteEmailDTO dto,
@@ -35,6 +40,7 @@ public class RelatorioEmailController {
                 .body("Os relatórios serão enviados .");
     }
 
+    @Operation(summary = "Download de relatórios.", description = "Relatorios selecionados são agrupados e disponibilizados para download.")
     @PostMapping("/baixar-lote")
     public ResponseEntity<byte[]> baixarRelatoriosZip(
             @Valid @RequestBody EnvioLoteEmailDTO dto,

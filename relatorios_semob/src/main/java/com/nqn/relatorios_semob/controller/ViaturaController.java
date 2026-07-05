@@ -5,6 +5,7 @@ import com.nqn.relatorios_semob.dto.ViaturaResponseDTO;
 import com.nqn.relatorios_semob.model.Usuario;
 import com.nqn.relatorios_semob.model.Viatura;
 import com.nqn.relatorios_semob.service.ViaturaService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -14,6 +15,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/viatura")
+@Tag(name = "Relatórios", description = "Criação, e manipulação de relatorios e emissão de documentos.")
 public class ViaturaController {
 
     private ViaturaService viaturaService;
