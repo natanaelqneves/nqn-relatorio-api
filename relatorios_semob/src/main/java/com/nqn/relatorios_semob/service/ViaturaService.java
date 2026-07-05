@@ -3,7 +3,6 @@ package com.nqn.relatorios_semob.service;
 import com.nqn.relatorios_semob.dto.ViaturaResponseDTO;
 import com.nqn.relatorios_semob.model.Viatura;
 import com.nqn.relatorios_semob.repository.ViaturaRepository;
-import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -18,7 +17,6 @@ public class ViaturaService {
         this.viaturaRepository = viaturaRepository;
     }
 
-    @Transactional
     public Viatura buscarViaturaPorId(Long id) {
         Viatura viatura = viaturaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Viatura não encontrada com o ID: " + id));
@@ -26,7 +24,6 @@ public class ViaturaService {
         return viatura;
     }
 
-    @Transactional
     public Viatura buscarViaturaPorPlaca(String placa) {
         Viatura viatura =  viaturaRepository.findByPlaca(placa)
                 .orElseThrow(() -> new RuntimeException("Viatura não encontrada com a placa: " + placa));
@@ -38,13 +35,13 @@ public class ViaturaService {
 
         viaturaRepository.findAll().
                 stream()
-                .map(this::novaViatura)
+                .map(this::gerarViaturaResponse)
                 .toList();
 
         return listaViaturasResponse;
     }
 
-    private ViaturaResponseDTO novaViatura(Viatura viatura) {
+    private ViaturaResponseDTO gerarViaturaResponse(Viatura viatura) {
         return new ViaturaResponseDTO(
                 viatura.getId(),
                 viatura.getPlaca(),

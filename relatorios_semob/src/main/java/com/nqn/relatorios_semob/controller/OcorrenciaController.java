@@ -23,7 +23,7 @@ public class OcorrenciaController {
 
     @Operation(summary = "Adiciona nova ocorrência.", description = "Registra os dados de novas ocorrencias.")
     @PostMapping("/{id}")
-    public ResponseEntity<OcorrenciaResponseDTO> adicionarOcorrencia(
+    public ResponseEntity<OcorrenciaResponseDTO> cadastrar(
             @PathVariable Long relatorioId,
             @Valid @RequestBody OcorrenciaRequestDTO ocorrenticaDTO
             ) {

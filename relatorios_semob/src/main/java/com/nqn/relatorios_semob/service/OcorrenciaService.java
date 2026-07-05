@@ -47,10 +47,6 @@ public class OcorrenciaService {
         ocorrenciaRepository.deleteById(ocorrenciaId);
     }
 
-    public void apagarPorIdRelatorio(Long id) {
-        ocorrenciaRepository.deleteByRelatorioId(id);
-    }
-
     private OcorrenciaResponseDTO gerarOcorrenciaResponse(Ocorrencia ocorrencia){
         return new OcorrenciaResponseDTO(
                 ocorrencia.getId(),
