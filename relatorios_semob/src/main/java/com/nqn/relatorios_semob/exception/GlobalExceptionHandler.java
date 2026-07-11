@@ -28,6 +28,18 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(body);
     }
 
+    @ExceptionHandler(org.springframework.security.core.AuthenticationException.class)
+    public ResponseEntity<Map<String, Object>> handleAuthenticationException(org.springframework.security.core.AuthenticationException ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.UNAUTHORIZED.value()); // 401
+        body.put("error", "Não Autorizado");
+        body.put("message", "Credenciais de acesso incorretas ou usuário não encontrado.");
+
+        // Sem printStackTrace() aqui! Erro de login é comum e não deve inundar o console.
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(body);
+    }
+
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Map<String, Object>> handleBusinessRules(IllegalArgumentException ex){
         Map<String, Object> body = new HashMap<>();
@@ -84,8 +96,6 @@ public class GlobalExceptionHandler {
         body.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value()); // 500
         body.put("error", "Erro interno do servidor");
         body.put("message", "Ocorreu um erro inesperado em nosso sistema. Tente novamente mais tarde.");
-
-        ex.printStackTrace();
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
     }
