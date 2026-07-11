@@ -23,18 +23,11 @@ public class AuthService {
     }
 
     public String login(AutenticacaoDTO dto){
-        try {
-            authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            dto.nomeDeUsuario(),
-                            dto.senha())
-            );
-        } catch (DisabledException e) {
-            throw new RuntimeException("Acesso pendente de liberação pelo Administrador/DBA");
-
-        } catch (org.springframework.security.core.AuthenticationException e) {
-            throw new RuntimeException("Credenciais de acesso incorretas ou usuário não encontrado.");
-        }
+        // Se falhar aqui, o Spring joga AuthenticationException,
+        // seu novo handler captura, joga HTTP 401 e não gera nenhuma linha de log pesado.
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(dto.nomeDeUsuario(), dto.senha())
+        );
 
         var usuario = usuarioRepository.findByNomeDeUsuario(dto.nomeDeUsuario())
                 .orElseThrow(() -> new RuntimeException("Erro interno ao carregar dados do usuário."));
