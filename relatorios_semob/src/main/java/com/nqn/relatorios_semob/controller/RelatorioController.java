@@ -58,6 +58,7 @@ public class RelatorioController {
     public ResponseEntity<RelatorioResponseDTO> buscarPorId(
             @PathVariable Long id,
             @AuthenticationPrincipal Usuario usuarioLogado){
+
         Relatorio relatorio =  relatorioService.buscarPorIdEUsuario(id, usuarioLogado);
         RelatorioResponseDTO response = relatorioService.gerarRelatorioResponse(relatorio);
 
@@ -70,6 +71,7 @@ public class RelatorioController {
             @AuthenticationPrincipal Usuario usuarioLogado,
             @RequestParam(value = "dataInicio", required = false) String dataInicio,
             @RequestParam(value = "dataFim", required = false) String dataFim){
+
         List<RelatorioResponseDTO> relatorios = relatorioService.listarPorUsuarioEPeriodo(usuarioLogado, dataInicio, dataFim);
 
         return ResponseEntity.ok(relatorios);
@@ -98,6 +100,7 @@ public class RelatorioController {
     public ResponseEntity<Void> apagarPorId(
             @PathVariable Long id,
             @AuthenticationPrincipal Usuario usuarioLogado){
+
         Relatorio relatorio = relatorioService.buscarPorIdEUsuario(id, usuarioLogado);
 
         if (relatorio.getUsuario() == null || !relatorio.getUsuario().getId().equals(usuarioLogado.getId())) {
