@@ -85,7 +85,7 @@ public class RelatorioService {
 
             relatorios = relatorioRepository.findByUsuarioIdAndPeriodo(usuarioLogado.getId(), dataInicio, dataFim);
         } else {
-            relatorios = relatorioRepository.findByUsuarioIdOrderByDataDoServicoDesc(usuarioLogado.getId());
+            relatorios = relatorioRepository.findByUsuarioIdAndPeriodo(usuarioLogado.getId(), LocalDate.now().withDayOfMonth(1), LocalDate.now());
         }
 
         relatorios.forEach(relatorio ->
