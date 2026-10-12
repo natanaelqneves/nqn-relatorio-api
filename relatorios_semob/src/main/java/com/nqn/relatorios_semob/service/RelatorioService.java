@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class RelatorioService {
@@ -72,26 +73,28 @@ public class RelatorioService {
     public List<RelatorioResponseDTO> listarPorUsuarioEPeriodo(
             Usuario usuarioLogado,
             String dataInicioStr,
-            String dataFimStr){
+            String dataFimStr) {
 
-        List<RelatorioResponseDTO> listaDeRelatorios = new ArrayList<>();
-        List<Relatorio> relatorios = new ArrayList<>();
+        LocalDate dataInicio;
+        LocalDate dataFim;
 
         if (dataInicioStr != null && !dataInicioStr.trim().isEmpty()
                 && dataFimStr != null && !dataFimStr.trim().isEmpty()) {
 
-            LocalDate dataInicio = LocalDate.parse(dataInicioStr);
-            LocalDate dataFim = LocalDate.parse(dataFimStr);
-
-            relatorios = relatorioRepository.findByUsuarioIdAndPeriodo(usuarioLogado.getId(), dataInicio, dataFim);
+            dataInicio = LocalDate.parse(dataInicioStr);
+            dataFim = LocalDate.parse(dataFimStr);
         } else {
-            relatorios = relatorioRepository.findByUsuarioIdAndPeriodo(usuarioLogado.getId(), LocalDate.now().withDayOfMonth(1), LocalDate.now());
+            dataInicio = LocalDate.now().withDayOfMonth(1);
+            dataFim = LocalDate.now();
         }
 
-        relatorios.forEach(relatorio ->
-                listaDeRelatorios.add(gerarRelatorioResponse(relatorio)));
+        List<Relatorio> relatorios = relatorioRepository.findByUsuarioIdAndPeriodo(
+                usuarioLogado.getId(), dataInicio, dataFim
+        );
 
-        return listaDeRelatorios;
+        return relatorios.stream()
+                .map(this::gerarRelatorioResponse)
+                .collect(Collectors.toList());
     }
 
     public void apagarRelatorio(Long id, Usuario usuarioLogado) {
