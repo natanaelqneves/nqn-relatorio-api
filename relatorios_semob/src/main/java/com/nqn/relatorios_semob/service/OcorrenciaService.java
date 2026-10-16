@@ -5,11 +5,15 @@ import com.nqn.relatorios_semob.dto.OcorrenciaRequestDTO;
 import com.nqn.relatorios_semob.dto.OcorrenciaResponseDTO;
 import com.nqn.relatorios_semob.model.Ocorrencia;
 import com.nqn.relatorios_semob.model.Relatorio;
+import com.nqn.relatorios_semob.model.Usuario;
 import com.nqn.relatorios_semob.repository.OcorrenciaRepository;
 import com.nqn.relatorios_semob.repository.RelatorioRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class OcorrenciaService {
@@ -27,18 +31,30 @@ public class OcorrenciaService {
         Relatorio relatorio = relatorioRepository.findById(relatorioId)
                 .orElseThrow(() -> new EntityNotFoundException("Relatório não encontrado com o ID: " + relatorioId));
 
-        Ocorrencia novaOcorrencia = new Ocorrencia();
-
-        novaOcorrencia.setRelatorio(relatorio);
-        novaOcorrencia.setUrlFoto(dto.urlFoto());
-        novaOcorrencia.setDescricaoDefeito(dto.descricaoDefeito());
-        novaOcorrencia.setLatitude(dto.latitude());
-        novaOcorrencia.setLongitude(dto.longitude());
+        // Utilizando o construtor completo para garantir que tudo é preenchido de uma vez
+        Ocorrencia novaOcorrencia = new Ocorrencia(
+                null,
+                relatorio,
+                dto.urlFoto(),
+                dto.descricaoDefeito(),
+                dto.latitude(),
+                dto.longitude(),
+                LocalDateTime.now()
+        );
 
         Ocorrencia ocorrenciaSalva = ocorrenciaRepository.save(novaOcorrencia);
 
         return gerarOcorrenciaResponse(ocorrenciaSalva);
     }
+
+    public List<OcorrenciaResponseDTO> listarOcorrenciasPorRelatorioDeUsuario(
+            Usuario usuarioLogado,
+            Long relatorioId) {
+
+//        List<Ocorrencia> ocorrencias = ocorrenciaRepository.findByUsuarioIdAndRelatorioId(usuarioLogado.getId(), relatorioId);
+    return null;
+    }
+
 
     public void apagarPorId(Long ocorrenciaId) {
         Ocorrencia ocorrencia = ocorrenciaRepository.findById(ocorrenciaId)

@@ -99,4 +99,20 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
     }
+
+//    @ExceptionHandler(Exception.class)
+//    public ResponseEntity<Map<String, Object>> handleGlobalException(Exception ex) {
+//        // Imprime o erro real no console do Spring Boot para você conseguir ler
+//        ex.printStackTrace();
+//
+//        Map<String, Object> body = new HashMap<>();
+//        body.put("timestamp", LocalDateTime.now());
+//        body.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value()); // 500
+//        body.put("error", "Erro interno do servidor");
+//
+//        // Devolve a mensagem real da exceção no JSON de resposta para ajudar no debug
+//        body.put("message", "Erro detalhado: " + ex.getMessage());
+//
+//        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
+//    }
 }
